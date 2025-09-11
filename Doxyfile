@@ -1,0 +1,18 @@
+# Doxyfile (essentials)
+
+# Project name
+PROJECT_NAME           = "Frameo Navigation Library"
+
+# Where to output the documentation
+OUTPUT_DIRECTORY       = ./docs/doxygen
+
+# The root directory of your source code
+INPUT                  = ./src  # <-- Adjust this to your source folder
+
+# Recursively scan subdirectories for code
+RECURSIVE              = YES
+
+# Tell Doxygen to generate diagrams if Graphviz is installed
+HAVE_DOT               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES

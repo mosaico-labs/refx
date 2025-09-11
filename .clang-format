@@ -1,0 +1,8 @@
+BasedOnStyle: Google
+ColumnLimit: 100
+IndentWidth: 4
+# SortIncludes: true
+# IncludeBlocks: Regroup
+# DerivePointerAlignment: false
+# PointerAlignment: Left
+# AllowShortFunctionsOnASingleLine: Empty
