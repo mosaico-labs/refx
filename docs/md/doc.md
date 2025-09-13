@@ -213,6 +213,10 @@ auto R_ned_frd = refx::Rotation<refx::ned, refx::frd>(ypr);
 refx::Vector3D<refx::frd> forward_thrust(10.0, 0.0, 0.0);
 refx::Vector3D<refx::ned> forward_thrust_ned = R_ned_frd * forward_thrust;
 
+// Rotation works with Coordinate3D objects also
+refx::Coordinate3D<refx::frd> p_body(10.0, 0.0, 0.0);
+refx::Coordinate3D<refx::ned> p_ned = R_ned_frd * p_body;
+
 //These are compile-time errors:
 // refx::Vector3D<refx::flu> forward_thrust_flu(10.0, 0.0, 0.0);
 // refx::Vector3D<refx::ned> forward_thrust_ned = R_ned_frd * forward_thrust_flu; //ERROR: source vector must be frd
@@ -311,11 +315,23 @@ The `Transformation` struct is composed of two key members:
 
 #### Mathematical Operation
 
-A `Transformation` is used to map a vector `p` from the source frame (`FromFrame`) to the destination frame (`ToFrame`). The operation is defined as follows:
+The `Transformation` class provides the pose transform operator, which accepts both `Vector3D` and `Coordinate3D`:
+```cpp
+VecType<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>&, const VecType<FrameC, T>&);
+```
+which implements the mathematical formula:
 
 `p_in_ToFrame = (rotation * p_in_FromFrame) + translation`
 
-This formula first rotates the point to align its axes with the new frame and then translates it to the new origin.
+and the pose composition operator
+
+```cpp
+Transformation<A, C, T> operator*(const Transformation<A, B, T>&, const Transformation<B, C, T>&)
+```
+
+which implements the mathematical formula: 
+
+`T_A_C = {T_A_B.rotation * T_B_C.rotation; T_A_B.rotation * T_B_C.translation + T_A_B.translation}`
 
 #### Example: Defining a Vehicle's Pose
 
@@ -332,10 +348,11 @@ auto vehicle_orientation = refx::Rotation<refx::ned, refx::frd>(
 //    This single object now encapsulates the vehicle's entire pose.
 auto T_ned_from_frd = refx::Transformation<refx::ned, refx::frd>{
     vehicle_orientation,
-    // The translation is the displacement vector from the NED origin
-    // to the vehicle's location. A Coordinate's values represent
-    // exactly this, so .as_vector() performs the semantic conversion.
-    vehicle_position.as_vector()
+    // When assigned to the Transformation translation component,
+    // `vehicle_position` is to be intended as a displacement vector
+    // from the NED origin to the vehicle's location. In this way,
+    // it can be consistently used as algebraic operator with Coordinates.
+    vehicle_position.as_vector() //move to Vector3D
 };
 
 // 3. This Transformation object is now the key input for functions that
@@ -517,12 +534,13 @@ Coordinate3D<frameTo, T> frame_transform(const Coordinate3D<frameFrom, T>&,
                                          const Coordinate3D<frameOrigin, T>&,
                                          const EarthModel<T>&);
 ```
-3.  **`Transformation` (Full Pose Context)**: This is the most complete and unambiguous way to define the relationship between two **Cartesian** frames. A `Transformation` object encapsulates the full **pose** (position and orientation) of one frame within another. For example, when converting a coordinate into a local `ned` frame, the `Transformation<ned, ecef>` provides the complete blueprint for the conversion by defining the local frame's pose within the global `ecef` system.
+3.  **`Transformation` (Full Pose Context)**: This is just an alias API for the Transformation's product operator:  
+`operator*(const Transformation<FrameA, FrameB, T>&, const VecType<FrameC, T>&)`.
 ```cpp
 /// @brief Transforms a vector between two Cartesian frames using a full SE(3) pose
-template <typename frameTo, typename frameFrom, typename T>
-Vector3D<frameTo, T> frame_transform(const Vector3D<frameFrom, T>&,
-                                     const Transformation<frameTo, frameFrom, T>&);
+template <typename frameTo, typename frameFrom, template <class, class> class VecType, typename T>
+VecType<frameTo, T> frame_transform(const Transformation<frameTo, frameFrom, T>&,
+                                    const VecType<frameFrom, T>&);
 ```
 
 

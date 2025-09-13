@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "../../frames/internal/frame_validators.h"
+#include "../../frames/internal/validators.h"
 #include "../../geometry/coordinate.h"
 #include "../../math/angles.h"
 #include "../../models/earth_model/earth_model.h"
@@ -68,7 +68,7 @@ struct FrameTransformer<axis_frd, axis_aer, frameTo, frameFrom> {
     template <template <class, class> class VecType, typename T>
     static VecType<frameTo, T> transform(const VecType<frameFrom, T>& from) {
         // validate the out desired frame to be of the right type
-        FrameAxisValidator<typename frameTo::axis, axis_frd>::validate();
+        AxisValidator<typename frameTo::axis, axis_frd>::validate();
 
         const T az = deg2rad(from.x());
         const T el = deg2rad(from.y());
@@ -87,7 +87,7 @@ struct FrameTransformer<axis_aer, axis_frd, frameTo, frameFrom> {
     template <template <class, class> class VecType, typename T>
     static VecType<frameTo, T> transform(const VecType<frameFrom, T>& from) {
         // validate the input frame to be of the right type
-        FrameAxisValidator<typename frameFrom::axis, axis_frd>::validate();
+        AxisValidator<typename frameFrom::axis, axis_frd>::validate();
 
         const T rgt = from.y(), fwd = from.x(), up = -from.z();
         const T r = std::hypot(rgt, fwd);

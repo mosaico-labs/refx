@@ -44,8 +44,7 @@ template <typename frameTo, typename frameFrom, template <class, class> class Ve
 VecType<frameTo, T> frame_cast(const VecType<frameFrom, T>& from) {
     // if the following pass, then the frameTo and frameFrom are safe to be passed to the function
     internal::FrameTagValidator<frameTo::tag, frameFrom::tag>::validate();
-    internal::FrameDirectionalAxisValidator<typename frameTo::axis,
-                                            typename frameFrom::axis>::validate();
+    internal::FrameDirectionalAxisValidator<frameTo, frameFrom>::validate();
 
     return internal::FrameConverter<frameTo, frameFrom>::convert(from);
 }

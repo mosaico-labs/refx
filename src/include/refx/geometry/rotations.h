@@ -6,6 +6,7 @@
 
 #include "../math/angles.h"
 #include "internal/euler_base.h"
+#include "internal/traits.h"
 #include "internal/vector_base.h"
 #include "vector.h"
 
@@ -107,12 +108,6 @@ struct UnitQuaternion : public internal::VectorContainer4D<T> {
     static UnitQuaternion from_rotation_z(T angle);
 
     // --- Quaternion Algebra ---
-
-    /**
-     * @brief Computes the identity (zero-rotation) quaternion.
-     * @return A new `UnitQuaternion` representing the identity.
-     */
-    UnitQuaternion identity() const { return UnitQuaternion(); }
 
     /**
      * @brief Computes the conjugate of the quaternion.
@@ -414,6 +409,9 @@ std::ostream& operator<<(std::ostream& os, const EulerAngles<Seq, T>& eul) {
  */
 template <typename ToFrame, typename FromFrame, typename T = double>
 struct Rotation {
+    static_assert(is_valid_rotation_v<ToFrame, FromFrame>,
+                  "Rotation operator is only allowed for DirectionalAxis (Cartesian) frames");
+
    private:
     UnitQuaternion<T> m_quat;  ///< Internal quaternion storage.
 
@@ -456,7 +454,7 @@ struct Rotation {
      */
     explicit Rotation(const Eigen::Matrix<T, 3, 3>& rot_matrix)
         : m_quat(UnitQuaternion<T>(rot_matrix)) {}
-#endif
+#endif /* _REFX_GEOMETRY_ROTATIONS_ */
 
     // --- Factory Functions ---
     /**
@@ -499,7 +497,7 @@ struct Rotation {
      * @return A 3x3 Eigen rotation matrix (DCM).
      */
     Eigen::Matrix<T, 3, 3> to_eigen_matrix() const { return m_quat.to_eigen().toRotationMatrix(); }
-#endif
+#endif /* REFX_ENABLE_EIGEN_SUPPORT */
 
     // --- Core Operations ---
 

@@ -1,6 +1,7 @@
 #ifndef _REFX_GEOMETRY_TRANSFORMATION_
 #define _REFX_GEOMETRY_TRANSFORMATION_
 
+#include "internal/traits.h"
 #include "rotations.h"
 #include "vector.h"
 
@@ -29,6 +30,12 @@ namespace refx {
  */
 template <typename ToFrame, typename FromFrame, typename T = double>
 struct Transformation {
+    static_assert(is_valid_transformation_v<ToFrame, FromFrame>,
+                  "Transformation operator is only allowed for DirectionalAxis (Cartesian) frames");
+
+    Transformation()
+        : rotation(Rotation<ToFrame, FromFrame, T>()), translation(Vector3D<ToFrame, T>()) {}
+
     /// @brief Constructs a Transformation from a Vector3D.
     Transformation(const Rotation<ToFrame, FromFrame, T>& r, const Vector3D<ToFrame, T>& t)
         : rotation(r), translation(t) {}
@@ -90,11 +97,12 @@ struct Transformation {
  * @return A new Transformation object of type `Transformation<A, C, T>` representing
  * the direct transformation from frame C to frame A.
  */
-template <typename FrameA, typename FrameB, typename FrameC, typename T>
-Vector3D<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>& T_A_B,
-                              const Vector3D<FrameC, T>& V) {
+template <typename FrameA, typename FrameB, typename FrameC, template <class, class> class VecType,
+          typename T>
+VecType<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>& T_A_B,
+                             const VecType<FrameC, T>& V) {
     if constexpr (internal::FrameValidator<FrameB, FrameC>::validate()) {
-        return Vector3D<FrameA, T>(T_A_B.rotation * V + T_A_B.translation);
+        return VecType<FrameA, T>(T_A_B.rotation * V + T_A_B.translation);
     }
 }
 

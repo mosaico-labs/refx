@@ -1,6 +1,7 @@
 #ifndef _REFX_TRANSFORMATIONS_TRANSFORM_
 #define _REFX_TRANSFORMATIONS_TRANSFORM_
 
+#include "../frames/internal/traits.h"  // For is_semantic_axis_v, is_directional_axis_v
 #include "../geometry/transformation.h"
 #include "../models/earth_model/earth_model.h"
 #include "internal/frame_transformer.hpp"
@@ -41,7 +42,7 @@ VecType<frameTo, T> frame_transform(const VecType<frameFrom, T>& from) {
     // evaluate the same frame tag
     internal::FrameTagValidator<frameTo::tag, frameFrom::tag>::validate();
     // evaluate just one must have semantic axis
-    internal::FrameSemanticAxisValidator<typename frameTo::axis, typename frameFrom::axis,
+    internal::FrameSemanticAxisValidator<frameTo, frameFrom,
                                          internal::ValidateCondition::XOR>::validate();
     // extract the canonical frame for the tag
     using frameCanonical = typename internal::canonical_frame<frameTo::tag>::frame;
@@ -128,24 +129,25 @@ Coordinate3D<frameTo, T> frame_transform(const Coordinate3D<frameFrom, T>& from,
 }
 
 /**
- * @brief Transforms a vector between two Cartesian frames using a full SE(3) pose.
+ * @brief Transforms a vector/coordinate between two Cartesian frames using a full SE(3) pose.
  * @details This function serves as operator for transforming physical quantities
  * between two Cartesian frames (e.g., from a vehicle's body to the world).
  * It uses a `Transformation` object to provide the complete pose (the SE(3)
  * context) that defines the relationship between the source and destination frames.
  * @tparam frameTo The destination (target) Cartesian frame tag type.
  * @tparam frameFrom The source Cartesian frame tag type.
+ * @tparam VecType The underlying vector type (Vector3D/Coordinate3D).
  * @tparam T The underlying scalar type for calculations (e.g., double, float).
- * @param from The `Vector3D` to be transformed.
+ * @param from The `Vector3D/Coordinate3D` to be transformed.
  * @param pose The `Transformation<frameTo, frameFrom, T>` object that defines
  * the complete pose (orientation and position) of the `frameFrom`
  * relative to the `frameTo`.
- * @return A new `Vector3D<frameTo>` representing the `from` vector expressed
+ * @return A new `Vector3D/Coordinate3D<frameTo>` representing the `from` vector expressed
  * in the destination frame.
  */
-template <typename frameTo, typename frameFrom, typename T>
-Vector3D<frameTo, T> frame_transform(const Vector3D<frameFrom, T>& p_from,
-                                     const Transformation<frameTo, frameFrom, T>& pose) {
+template <typename frameTo, typename frameFrom, template <class, class> class VecType, typename T>
+VecType<frameTo, T> frame_transform(const Transformation<frameTo, frameFrom, T>& pose,
+                                    const VecType<frameFrom, T>& p_from) {
     return pose * p_from;
 }
 }  // namespace refx

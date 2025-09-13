@@ -1,7 +1,7 @@
-#ifndef _REFX_FRAMES_INTERNAL_FRAME_VALIDATORS_
-#define _REFX_FRAMES_INTERNAL_FRAME_VALIDATORS_
+#ifndef _REFX_FRAMES_INTERNAL_VALIDATORS_
+#define _REFX_FRAMES_INTERNAL_VALIDATORS_
 
-#include "../axis.h"  // For is_semantic_axis_v, is_directional_axis_v
+#include "../internal/traits.h"  // For is_semantic_axis_v, is_directional_axis_v
 #include "../tags.h"
 
 /**
@@ -74,7 +74,7 @@ struct FrameTagValidator {
  * @brief Validates that two axis are equal.
  */
 template <typename axisA, typename axisB>
-struct FrameAxisValidator {
+struct AxisValidator {
     /**
      * @brief Performs the compile-time check.
      */
@@ -98,25 +98,28 @@ struct FrameAxisValidator {
  * (e.g., NED -> ENU), this validator will trigger a compile-time error,
  * guiding them to use the more appropriate and efficient `frame_cast` API.
  */
-template <typename axisA, typename axisB = axisA, ValidateCondition C = ValidateCondition::AND>
+template <typename frameA, typename frameB = frameA, ValidateCondition C = ValidateCondition::AND>
 struct FrameSemanticAxisValidator {
     /**
      * @brief Performs the compile-time check.
      */
     static constexpr bool validate() {
         if constexpr (C == ValidateCondition::AND) {
-            static_assert(is_semantic_axis_v<axisA> && is_semantic_axis_v<axisB>,
+            static_assert(is_semantic_axis_v<typename frameA::axis> &&
+                              is_semantic_axis_v<typename frameB::axis>,
                           "This conversion is only allowed between semantic axis frames "
                           "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
             return true;
         } else if constexpr (C == ValidateCondition::OR) {
             static_assert(
-                is_semantic_axis_v<axisA> || is_semantic_axis_v<axisB>,
+                is_semantic_axis_v<typename frameA::axis> ||
+                    is_semantic_axis_v<typename frameB::axis>,
                 "This conversion is only allowed whean at least one of the frames are semantic "
                 "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
             return true;
         } else {  // XOR
-            static_assert(is_semantic_axis_v<axisA> != is_semantic_axis_v<axisB>,
+            static_assert(is_semantic_axis_v<typename frameA::axis> !=
+                              is_semantic_axis_v<typename frameB::axis>,
                           "This conversion is only allowed when only one the frames is semantic "
                           "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
             return true;
@@ -135,29 +138,29 @@ struct FrameSemanticAxisValidator {
  * more appropriate `frame_transform` API which can handle the necessary
  * physical projections.
  */
-template <typename axisA, typename axisB = axisA, ValidateCondition C = ValidateCondition::AND>
+template <typename frameA, typename frameB = frameA, ValidateCondition C = ValidateCondition::AND>
 struct FrameDirectionalAxisValidator {
     /**
      * @brief Performs the compile-time check.
      */
     static constexpr bool validate() {
         if constexpr (C == ValidateCondition::AND) {
-            static_assert(
-                is_directional_axis_v<axisA> && is_directional_axis_v<axisB>,
-                "This conversion is only allowed between directional axis frames "
-                "(Non-cartesian frame). Maybe you wanted to call the frame_transform API.");
+            static_assert(is_directional_axis_v<typename frameA::axis> &&
+                              is_directional_axis_v<typename frameB::axis>,
+                          "This operation is only allowed between directional axis frames "
+                          "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
             return true;
         } else if constexpr (C == ValidateCondition::OR) {
-            static_assert(
-                is_directional_axis_v<axisA> || is_directional_axis_v<axisB>,
-                "This conversion is only allowed whean at least one of the frames are directional "
-                "(Non-cartesian frame). Maybe you wanted to call the frame_transform API.");
+            static_assert(is_directional_axis_v<typename frameA::axis> ||
+                              is_directional_axis_v<typename frameB::axis>,
+                          "This operation is only allowed between directional axis frames "
+                          "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
             return true;
         } else {  // XOR
-            static_assert(
-                is_directional_axis_v<axisA> != is_directional_axis_v<axisB>,
-                "This conversion is only allowed when only one the frames is directional "
-                "(Non-cartesian frame). Maybe you wanted to call the frame_transform API.");
+            static_assert(is_directional_axis_v<typename frameA::axis> !=
+                              is_directional_axis_v<typename frameB::axis>,
+                          "This operation is only allowed when only one the frames is directional "
+                          "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
             return true;
         }
     }
@@ -166,4 +169,4 @@ struct FrameDirectionalAxisValidator {
 }  // namespace internal
 }  // namespace refx
 
-#endif /* _REFX_FRAMES_INTERNAL_FRAME_VALIDATORS_ */
+#endif /* _REFX_FRAMES_INTERNAL_VALIDATORS_ */

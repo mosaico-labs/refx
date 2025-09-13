@@ -2,7 +2,7 @@
 #define _REFX_GEOMETRY_COORDINATE_
 
 #include "../frames/frames.h"
-#include "../frames/internal/traits.h"
+#include "../frames/internal/validators.h"
 #include "../geometry/vector.h"
 #include "../math/angles.h"
 
@@ -32,6 +32,11 @@ namespace refx {
  */
 template <typename Frame, typename T = double>
 struct Coordinate3D : public Vector3D<Frame, T> {
+    // accept without specialization only if a Cartesian frame
+    static_assert(
+        is_directional_axis_v<typename Frame::axis>,
+        "Non-specialized Coordinate3D is only possible for DirectionalAxis (Cartesian) frames");
+
     typedef Frame frame;
     typedef T scalar_type;
     /// @brief Inherits all constructors from the base Vector3D class.
@@ -123,7 +128,7 @@ struct Coordinate3D<lla, T> : public internal::VectorContainer3D<T> {
      * @brief Provides const access to the Altitude component.
      * @return The altitude value in **meters**.
      */
-    T altitude() const { return this->z(); }
+    const T& altitude() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -204,7 +209,7 @@ struct Coordinate3D<lld, T> : public internal::VectorContainer3D<T> {
      * @brief Provides const access to the Down/Depth component.
      * @return The down value in **meters**.
      */
-    T down() const { return this->z(); }
+    const T& down() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -288,7 +293,7 @@ struct Coordinate3D<aer, T> : public internal::VectorContainer3D<T> {
      * @brief Provides const access to the Range component.
      * @return The range value in **meters**.
      */
-    T range() const { return this->z(); }
+    const T& range() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.

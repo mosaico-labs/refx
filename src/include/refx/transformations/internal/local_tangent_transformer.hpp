@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "../../frames/internal/frame_validators.h"
+#include "../../frames/internal/validators.h"
 #include "../../geometry/coordinate.h"
 #include "../../math/angles.h"
 #include "../../models/earth_model/earth_model.h"
@@ -55,7 +55,7 @@ struct LocalTangentTransformer<typename canonical_frame<FrameTag::LocalTangent>:
         FrameTagValidator<frameToLocal::tag, FrameTag::LocalTangent>::validate();
         FrameTagValidator<frameOrigin::tag, FrameTag::Geocentric>::validate();
         // verify that the canonical frame is what we expect (ned)
-        FrameAxisValidator<typename frameToLocal::axis, axis_frd>::validate();
+        AxisValidator<typename frameToLocal::axis, axis_frd>::validate();
 
         // transform to LLA regardless of the specific type of `frameOrigin`
         const Coordinate3D<lla, T> orig_lla =
@@ -91,7 +91,7 @@ struct LocalTangentTransformer<lla, typename canonical_frame<FrameTag::LocalTang
         FrameTagValidator<frameFromLocal::tag, FrameTag::LocalTangent>::validate();
         FrameTagValidator<frameOrigin::tag, FrameTag::Geocentric>::validate();
         // verify that the canonical frame is what we expect (ned)
-        FrameAxisValidator<typename frameFromLocal::axis, axis_frd>::validate();
+        AxisValidator<typename frameFromLocal::axis, axis_frd>::validate();
 
         // transform to LLA the origin, regardless of the specific type of `frameOrigin`
         const Coordinate3D<lla, T> orig_lla =

@@ -2,7 +2,6 @@
 #define _REFX_GEOMETRY_INTERNAL_OPERATORS_
 
 #include "../../frames/internal/traits.h"
-// #include "math/operations.h"
 
 namespace refx {
 namespace internal {
