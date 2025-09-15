@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 #include "refx/geometry.h"
 #include "refx/math.h"
+#include "refx/transformations.h"
 
 // Use a consistent namespace for tests
 namespace refx {
@@ -52,10 +53,6 @@ TEST_F(TransformationTest, FrameSafety) {
     // The "success" of this test is that the code above fails to build.
     SUCCEED();
 }
-
-// --- Advanced Corner Cases ---
-// The following tests assume that composition (operator*) and inversion (.inverse())
-// have been implemented for the Transformation struct.
 
 /**
  * @test CompositionOfTransformations
@@ -134,6 +131,67 @@ TEST_F(TransformationTest, InverseTransformation) {
     EXPECT_NEAR(T_frd_ned.translation.y(), expected_inv_translation.y(), HARD_TOLERANCE);
     EXPECT_NEAR(T_frd_ned.translation.z(), expected_inv_translation.z(), HARD_TOLERANCE);
 }
+
+/**
+ * @test TramsformationCoordinateProduct
+ * @brief Verifies the correctness of the operator* method, when rhs is a Coordinate<>
+ */
+TEST_F(TransformationTest, TramsformationCoordinateProduct) {
+    // 1. Arrange: Create an initial transformation from vehicle (frd) to world (ned).
+    auto T_ned_frd = TransformNED_FRD{test_rotation, test_translation};
+
+    // 2. Generate a Coordinate3D of the coherent frame type (frd).
+    Coordinate3D<frd> p_frd(1, 2, 3);
+
+    // 3. Test multiplication legit and results
+    Coordinate3D<ned> p_ned = T_ned_frd * p_frd;
+    // The same result is obtained via:
+    // Coordinate3D<ned> p_ned = frame_transform(T_ned_frd, p_frd);
+
+    // These are compile-time errors
+    // Coordinate3D<frd> p_ned = T_ned_frd * v_frd; //output must be <ned>
+    // Coordinate3D<ned> p_ned = T_ned_frd.inverse() * v_frd; //inverse() maps ned to frd
+    // Coordinate3D<ned> p_ned = T_ned_frd * Vector3D<frd>(); //rhs must be a Coordinate3D
+
+    // This is ok: p_ned is a 'Vector3D'
+    // auto p_ned = T_ned_frd * Vector3D<frd>();
+
+    // Assert that the computed inverse translation is nearly equal to the expected one.
+    EXPECT_NEAR(p_ned.north(), 8.0, HARD_TOLERANCE);
+    EXPECT_NEAR(p_ned.east(), 21.0, HARD_TOLERANCE);
+    EXPECT_NEAR(p_ned.down(), 33.0, HARD_TOLERANCE);
+}
+
+/**
+ * @test TramsformationCoordinateProduct
+ * @brief Verifies the correctness of the operator* method, when rhs is a Vector<>
+ */
+TEST_F(TransformationTest, TramsformationVectorProduct) {
+    // 1. Arrange: Create an initial transformation from vehicle (frd) to world (ned).
+    auto T_ned_frd = TransformNED_FRD{test_rotation, test_translation};
+
+    // 2. Generate a Coordinate3D of the coherent frame type (frd).
+    Vector3D<frd> v_frd(1, 2, 3);
+
+    // 3. Test multiplication legit and results
+    Vector3D<ned> v_ned = T_ned_frd * v_frd;
+    // The same result is obtained via:
+    // Vector3D<ned> v_ned = frame_transform(T_ned_frd, v_frd);
+
+    // These are compile-time errors
+    // Vector3D<frd> v_ned = T_ned_frd * v_frd;
+    // Vector3D<ned> v_ned = T_ned_frd.inverse() * v_frd;
+
+    // Assert that the computed inverse translation is nearly equal to the expected one.
+    EXPECT_NEAR(v_ned.north(), 8.0, HARD_TOLERANCE);
+    EXPECT_NEAR(v_ned.east(), 21.0, HARD_TOLERANCE);
+    EXPECT_NEAR(v_ned.down(), 33.0, HARD_TOLERANCE);
+
+    // This is possible: exploits object slicing (Coordinate3D is derived from Vector3D)
+    // TODO: decide about this to be lecit or not.
+    // v_ned = T_ned_frd * Coordinate3D<frd>();
+}
+
 }  // namespace testing
 }  // namespace refx
 #endif /* _GEOMETRY_TEST_TRANSFORMATION_ */

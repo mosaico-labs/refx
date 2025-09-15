@@ -2,7 +2,7 @@
 #define _REFX_GEOMETRY_COORDINATE_
 
 #include "../frames/frames.h"
-#include "../frames/internal/traits.h"
+#include "../frames/internal/validators.h"
 #include "../geometry/vector.h"
 #include "../math/angles.h"
 
@@ -32,6 +32,11 @@ namespace refx {
  */
 template <typename Frame, typename T = double>
 struct Coordinate3D : public Vector3D<Frame, T> {
+    // accept without specialization only if a Cartesian frame
+    static_assert(
+        is_directional_axis_v<typename Frame::axis>,
+        "Non-specialized Coordinate3D is only possible for DirectionalAxis (Cartesian) frames");
+
     typedef Frame frame;
     typedef T scalar_type;
     /// @brief Inherits all constructors from the base Vector3D class.
@@ -314,8 +319,8 @@ template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a,
                                   const Coordinate3D<Frame2, T>& b) {
     static_assert(false,
-                  "The summation between two Coordinates3D is not allowed. Check the documentation "
-                  "for details.");
+                  "The summation between two Coordinate3D is not allowed. Maybe you wanted to sum "
+                  "two Vector3D. Check the documentation for details.");
 }
 
 /**
@@ -339,9 +344,8 @@ template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> operator-(const Coordinate3D<Frame1, T>& a, const Coordinate3D<Frame2, T>& b) {
     // The subtraction of two Vector3D objects will correctly invoke the
     // specialized arithmetic defined by FramedVecOperator, which uses FrameTraits.
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return Vector3D<Frame1, T>(a.data()) - Vector3D<Frame2, T>(b.data());
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    return Vector3D<Frame1, T>(a.data()) - Vector3D<Frame2, T>(b.data());
 }
 
 /**
@@ -362,10 +366,9 @@ Vector3D<Frame1, T> operator-(const Coordinate3D<Frame1, T>& a, const Coordinate
 template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
     // The addition will correctly invoke the specialized arithmetic from FramedVecOperator.
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        const auto& res = Vector3D<Frame1, T>(a.data()) + b;
-        return {res.x(), res.y(), res.z()};
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    const auto& res = Vector3D<Frame1, T>(a.data()) + b;
+    return {res.x(), res.y(), res.z()};
 }
 
 /**
@@ -378,10 +381,9 @@ Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a, const Vector
  */
 template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Vector3D<Frame1, T>& a, const Coordinate3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        // Forward the call to the canonical version.
-        return b + a;
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    // Forward the call to the canonical version.
+    return b + a;
 }
 
 }  // namespace refx

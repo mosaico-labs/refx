@@ -4,7 +4,7 @@
 #include <type_traits>
 
 #include "../../frames/axis.h"
-#include "../../frames/internal/frame_validators.h"
+#include "../../frames/internal/validators.h"
 #include "../../geometry/coordinate.h"
 #include "shuffler_helper.hpp"
 
@@ -22,15 +22,17 @@ struct FrameConverter {
     static VecType<frameTo, T> convert(const VecType<frameFrom, T>& from) {
         if constexpr (std::is_same_v<frameTo, frameFrom>) {
             return from;
+        } else {
+            FrameDirectionalAxisValidator<frameTo, frameFrom>::validate();
+            // here the magic of axis shuffle happens!
+            return VecType<frameTo, T>{
+                // Target X component: Project 'from' onto the 'To' X-direction
+                get_value_along<AxisTraits<AxisTo>::X>(from),
+                // Target Y component: Project 'from' onto the 'To' Y-direction
+                get_value_along<AxisTraits<AxisTo>::Y>(from),
+                // Target Z component: Project 'from' onto the 'To' Z-direction
+                get_value_along<AxisTraits<AxisTo>::Z>(from)};
         }
-        FrameDirectionalAxisValidator<typename frameTo::axis, typename frameFrom::axis>::validate();
-        // here the magic of axis shuffle happens!
-        return VecType<frameTo, T>{// Target X component: Project 'from' onto the 'To' X-direction
-                                   get_value_along<AxisTraits<AxisTo>::X>(from),
-                                   // Target Y component: Project 'from' onto the 'To' Y-direction
-                                   get_value_along<AxisTraits<AxisTo>::Y>(from),
-                                   // Target Z component: Project 'from' onto the 'To' Z-direction
-                                   get_value_along<AxisTraits<AxisTo>::Z>(from)};
     }
 };
 

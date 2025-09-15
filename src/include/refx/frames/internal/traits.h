@@ -178,7 +178,37 @@ struct AxisTraits<DirectionalAxis<x, y, z>> {
     static constexpr AxisDirection Z = z;
 };
 
+// Primary templates default to false.
+template <typename T>
+struct is_semantic_axis : std::false_type {};
+template <typename T>
+struct is_directional_axis : std::false_type {};
+
+// Partial specializations for any valid axis type.
+template <AxisSemantic x, AxisSemantic y, AxisSemantic z>
+struct is_semantic_axis<SemanticAxis<x, y, z>> : std::true_type {};
+
+template <AxisDirection x, AxisDirection y, AxisDirection z>
+struct is_directional_axis<DirectionalAxis<x, y, z>> : std::true_type {};
 }  // namespace internal
+
+/**
+ * @brief A C++17 variable template that is true if T is a SemanticAxis.
+ * @details This trait is a key tool for static polymorphism, allowing functions
+ * and classes to adapt their behavior at compile time based on whether a frame
+ * is non-Cartesian.
+ */
+template <typename FrameAxis>
+inline constexpr bool is_semantic_axis_v = internal::is_semantic_axis<FrameAxis>::value;
+
+/**
+ * @brief A C++17 variable template that is true if T is a DirectionalAxis.
+ * @details This trait allows algorithms to verify at compile time that a frame
+ * is Cartesian before attempting geometric operations like cross products.
+ */
+template <typename FrameAxis>
+inline constexpr bool is_directional_axis_v = internal::is_directional_axis<FrameAxis>::value;
+
 }  // namespace refx
 
 #endif /* _REFX_FRAMES_INTERNAL_TRAITS_ */

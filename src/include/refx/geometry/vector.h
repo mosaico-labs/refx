@@ -4,8 +4,8 @@
 #include <array>
 
 #include "../frames/frames.h"
-#include "../frames/internal/frame_validators.h"
-#include "../frames/internal/traits.h"
+#include "../frames/internal/traits.h"  //has_axis_and_tag_v
+#include "../frames/internal/validators.h"
 #include "../math/angles.h"
 #include "internal/operators.h"
 #include "internal/vector_base.h"
@@ -106,11 +106,11 @@ struct Vector3D<ned, T> : public internal::VectorContainer3D<T> {
     T& down() { return this->z(); }
 
     /// @brief Provides const access to the North component.
-    const T& north() const { return this->x(); }
+    T north() const { return this->x(); }
     /// @brief Provides const access to the East component.
-    const T& east() const { return this->y(); }
+    T east() const { return this->y(); }
     /// @brief Provides const access to the Down component.
-    const T& down() const { return this->z(); }
+    T down() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -156,11 +156,11 @@ struct Vector3D<enu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the East component.
-    const T& east() const { return this->x(); }
+    T east() const { return this->x(); }
     /// @brief Provides const access to the North component.
-    const T& north() const { return this->y(); }
+    T north() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -207,84 +207,16 @@ struct Vector3D<nwu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the North component.
-    const T& north() const { return this->x(); }
+    T north() const { return this->x(); }
     /// @brief Provides const access to the West component.
-    const T& west() const { return this->y(); }
+    T west() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
      * @return A const reference to the internal `std::array` storing the components in {North,
      * West, Up} order.
-     */
-    const container_type& data() const { return internal::VectorContainer3D<T>::data; }
-};
-
-/**
- * @brief Specialization of `Vector3D` for a **Wander Azimuth (WA)** frame, with underlying
- * navigation frame in NED configuration.
- * @tparam T The scalar type, defaults to `double`.
- *
- * @details The WA frame represents a generic local tangent plane system, associated with a NED/ENU
- * frame. Access is provided via the standard `.x()`, `.y()`, and `.z()` methods inherited from the
- * base class.
- */
-template <typename T>
-struct Vector3D<wa, T> : public internal::VectorContainer3D<T> {
-    typedef wa frame;  ///< The frame tag type for this specialization.
-    using internal::VectorContainer3D<T>::VectorContainer3D;
-    using scalar_type = T;
-    using container_type =
-        typename internal::VectorContainer3D<T>::container_type;  ///< The underlying data
-                                                                  ///< container.
-
-    /**
-     * @brief Constructs a vector in the World Arbitrary frame.
-     * @param x X-axis component (default: 0).
-     * @param y Y-axis component (default: 0).
-     * @param z Z-axis component (default: 0).
-     */
-    Vector3D(T x = 0, T y = 0, T z = 0) : internal::VectorContainer3D<T>({x, y, z}) {}
-
-    /**
-     * @brief Provides const access to the underlying data container.
-     * @return A const reference to the internal `std::array` storing the components in {X, Y, Z}
-     * order.
-     */
-    const container_type& data() const { return internal::VectorContainer3D<T>::data; }
-};
-
-/**
- * @brief Specialization of `Vector3D` for a **Wander Azimuth (WA)** frame, with underlying
- * navigation frame in ENU configuration.
- * @tparam T The scalar type, defaults to `double`.
- *
- * @details The WA frame represents a generic local tangent plane system, associated with a NED/ENU
- * frame. Access is provided via the standard `.x()`, `.y()`, and `.z()` methods inherited from the
- * base class.
- */
-template <typename T>
-struct Vector3D<wa_enu, T> : public internal::VectorContainer3D<T> {
-    typedef wa_enu frame;  ///< The frame tag type for this specialization.
-    using internal::VectorContainer3D<T>::VectorContainer3D;
-    using scalar_type = T;
-    using container_type =
-        typename internal::VectorContainer3D<T>::container_type;  ///< The underlying data
-                                                                  ///< container.
-
-    /**
-     * @brief Constructs a vector in the World Arbitrary frame.
-     * @param x X-axis component (default: 0).
-     * @param y Y-axis component (default: 0).
-     * @param z Z-axis component (default: 0).
-     */
-    Vector3D(T x = 0, T y = 0, T z = 0) : internal::VectorContainer3D<T>({x, y, z}) {}
-
-    /**
-     * @brief Provides const access to the underlying data container.
-     * @return A const reference to the internal `std::array` storing the components in {X, Y, Z}
-     * order.
      */
     const container_type& data() const { return internal::VectorContainer3D<T>::data; }
 };
@@ -353,6 +285,14 @@ struct Vector3D<lla, T> : public internal::VectorContainer3D<T> {
     }
 
     // --- Semantic Accessors for Differential Quantities ---
+
+    // --- Mutable Accessors (always in degrees) ---
+    /// @brief Provides mutable access to the Latitude component in **degrees**.
+    T& delta_latitude() { return this->x(); }
+    /// @brief Provides mutable access to the Longitude component in **degrees**.
+    T& delta_longitude() { return this->y(); }
+    /// @brief Provides mutable access to the Down/Depth component in **meters**.
+    T& delta_altitude() { return this->z(); }
 
     /**
      * @brief Provides const access to the Latitude difference component.
@@ -443,6 +383,16 @@ struct Vector3D<lld, T> : public internal::VectorContainer3D<T> {
     static Vector3D<lld, T> from_radians(T delta_lat_rad, T delta_lon_rad, T delta_dow) {
         return Vector3D<lld, T>(rad2deg(delta_lat_rad), rad2deg(delta_lon_rad), delta_dow);
     }
+
+    // --- Semantic Accessors for Differential Quantities ---
+
+    // --- Mutable Accessors (always in degrees) ---
+    /// @brief Provides mutable access to the Latitude component in **degrees**.
+    T& delta_latitude() { return this->x(); }
+    /// @brief Provides mutable access to the Longitude component in **degrees**.
+    T& delta_longitude() { return this->y(); }
+    /// @brief Provides mutable access to the Down/Depth component in **meters**.
+    T& delta_down() { return this->z(); }
 
     // --- Const Accessors (with unit conversion) ---
     /**
@@ -537,6 +487,14 @@ struct Vector3D<aer, T> : public internal::VectorContainer3D<T> {
 
     // --- Semantic Accessors for Differential Quantities (with unit conversion) ---
 
+    // --- Mutable Accessors (always in degrees) ---
+    /// @brief Provides mutable access to the Latitude component in **degrees**.
+    T& delta_azimuth() { return this->x(); }
+    /// @brief Provides mutable access to the Longitude component in **degrees**.
+    T& delta_elevation() { return this->y(); }
+    /// @brief Provides mutable access to the Down/Depth component in **meters**.
+    T& delta_range() { return this->z(); }
+
     /**
      * @brief Provides const access to the azimuth difference component.
      * @param unit The desired angular unit (`AngleUnit::Deg` or `AngleUnit::Rad`).
@@ -560,50 +518,6 @@ struct Vector3D<aer, T> : public internal::VectorContainer3D<T> {
      * @brief Provides const access to the underlying data container.
      * @return A const reference to the internal `std::array` storing the components in
      * {Δazimuth (deg), Δelevation (deg), Δrange (m)} order.
-     */
-    const container_type& data() const { return internal::VectorContainer3D<T>::data; }
-};
-
-/**
- * @brief Specialization of `Vector3D` for the **Earth-Centered, Earth-Fixed (ECEF)** frame.
- * @tparam T The scalar type, defaults to `double`.
- *
- * @details The ECEF frame is a global Cartesian system. Its origin is at the Earth's center of
- * mass. Its axes are:
- * - **+X**: Points from the origin to the intersection of the equator and the prime meridian
- * (0° latitude, 0° longitude).
- * - **+Y**: Rotated 90° East from the X-axis in the equatorial plane.
- * - **+Z**: Points towards the North Pole, aligned with the Earth's rotation axis.
- * Access is provided via `.x()`, `.y()`, and `.z()`.
- */
-template <typename T>
-struct Vector3D<ecef, T> : public internal::VectorContainer3D<T> {
-    typedef ecef frame;  ///< The frame tag type for this specialization.
-    using internal::VectorContainer3D<T>::VectorContainer3D;
-    using scalar_type = T;
-    using container_type =
-        typename internal::VectorContainer3D<T>::container_type;  ///< The underlying data
-                                                                  ///< container.
-
-    /**
-     * @brief Constructs a vector in the ECEF frame.
-     * @param x X-axis component in meters (default: 0).
-     * @param y Y-axis component in meters (default: 0).
-     * @param z Z-axis component in meters (default: 0).
-     */
-    Vector3D(double x = 0, double y = 0, double z = 0)
-        : internal::VectorContainer3D<T>({x, y, z}) {}
-
-    /**
-     * @brief Constructs an ECEF vector from an existing data container.
-     * @param v A container (e.g., `std::array<T, 3>`) with {X, Y, Z} components.
-     */
-    Vector3D(const container_type& v) : internal::VectorContainer3D<T>(v) {}
-
-    /**
-     * @brief Provides const access to the underlying data container.
-     * @return A const reference to the internal `std::array` storing the components in {X, Y, Z}
-     * order.
      */
     const container_type& data() const { return internal::VectorContainer3D<T>::data; }
 };
@@ -645,11 +559,11 @@ struct Vector3D<frd, T> : public internal::VectorContainer3D<T> {
     T& down() { return this->z(); }
 
     /// @brief Provides const access to the Forward component.
-    const T& forward() const { return this->x(); }
+    T forward() const { return this->x(); }
     /// @brief Provides const access to the Right component.
-    const T& right() const { return this->y(); }
+    T right() const { return this->y(); }
     /// @brief Provides const access to the Down component.
-    const T& down() const { return this->z(); }
+    T down() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -696,11 +610,11 @@ struct Vector3D<ssh, T> : public internal::VectorContainer3D<T> {
     T& heave() { return this->z(); }
 
     /// @brief Provides const access to the Surge (forward) component.
-    const T& surge() const { return this->x(); }
+    T surge() const { return this->x(); }
     /// @brief Provides const access to the Sway (rightward) component.
-    const T& sway() const { return this->y(); }
+    T sway() const { return this->y(); }
     /// @brief Provides const access to the Heave (downward) component.
-    const T& heave() const { return this->z(); }
+    T heave() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -746,11 +660,11 @@ struct Vector3D<rfu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the Right component.
-    const T& right() const { return this->x(); }
+    T right() const { return this->x(); }
     /// @brief Provides const access to the Forward component.
-    const T& forward() const { return this->y(); }
+    T forward() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -797,88 +711,16 @@ struct Vector3D<flu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the Forward component.
-    const T& forward() const { return this->x(); }
+    T forward() const { return this->x(); }
     /// @brief Provides const access to the Left component.
-    const T& left() const { return this->y(); }
+    T left() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
      * @return A const reference to the internal `std::array` storing the components in {Forward,
      * Left, Up} order.
-     */
-    const container_type& data() const { return internal::VectorContainer3D<T>::data; }
-};
-
-/**
- * @brief A 3D vector representing a measurement in the IMU sensor frame.
- * @details This class is a specialization of `Vector3D` for the `imu` frame.
- * It is used to represent physical quantities measured by an Inertial
- * Measurement Unit, such as:
- * - **Angular Velocity** (typically in rad/s)
- * - **Linear Acceleration** (typically in m/s²)
- * The coordinate system follows the standard `imu` frame convention:
- * - **+X**: Forward
- * - **+Y**: Left
- * - **+Z**: Up
- * @tparam T The scalar type, defaults to `double`.
- */
-template <typename T>
-struct Vector3D<imu, T> : public internal::VectorContainer3D<T> {
-    typedef imu frame;  ///< The frame tag type for this specialization.
-    using internal::VectorContainer3D<T>::VectorContainer3D;
-    using scalar_type = T;
-    using container_type =
-        typename internal::VectorContainer3D<T>::container_type;  ///< The underlying data
-                                                                  ///< container.
-    /**
-     * @brief Constructs a vector in the IMU frame.
-     * @param x_val The component along the X (Forward) axis.
-     * @param y_val The component along the Y (Left) axis.
-     * @param z_val The component along the Z (Up) axis.
-     */
-    Vector3D(T x_val = 0, T y_val = 0, T z_val = 0)
-        : internal::VectorContainer3D<T>({x_val, y_val, z_val}) {}
-
-    /**
-     * @brief Provides const access to the underlying data container.
-     * @return A const reference to the internal `std::array` storing the components
-     * in {X, Y, Z} order.
-     */
-    const container_type& data() const { return internal::VectorContainer3D<T>::data; }
-};
-
-/**
- * @brief A 3D vector representing a measurement in the Camera sensor frame.
- * @details This class is a specialization of `Vector3D` for the `camera` (pinhole) frame.
- * The coordinate system follows the standard `pinhole` frame convention:
- * - **+Z**: Forward.
- * - **+X**: Right.
- * - **+Y**: Down.
- * @tparam T The scalar type, defaults to `double`.
- */
-template <typename T>
-struct Vector3D<camera, T> : public internal::VectorContainer3D<T> {
-    typedef camera frame;  ///< The frame tag type for this specialization.
-    using internal::VectorContainer3D<T>::VectorContainer3D;
-    using scalar_type = T;
-    using container_type =
-        typename internal::VectorContainer3D<T>::container_type;  ///< The underlying data
-                                                                  ///< container.
-    /**
-     * @brief Constructs a vector in the camera frame.
-     * @param x_val The component along the X (Right) axis.
-     * @param y_val The component along the Y (Down) axis.
-     * @param z_val The component along the Z (Forward) axis.
-     */
-    Vector3D(T x_val = 0, T y_val = 0, T z_val = 0)
-        : internal::VectorContainer3D<T>({x_val, y_val, z_val}) {}
-
-    /**
-     * @brief Provides const access to the underlying data container.
-     * @return A const reference to the internal `std::array` storing the components
-     * in {X, Y, Z} order.
      */
     const container_type& data() const { return internal::VectorContainer3D<T>::data; }
 };
@@ -906,9 +748,8 @@ struct Vector3D<camera, T> : public internal::VectorContainer3D<T> {
 
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> operator+(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return internal::FramedVecOperator<Vector3D<Frame1, T>>::add(a, b);
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    return internal::FramedVecOperator<Vector3D<Frame1, T>>::add(a, b);
 }
 
 /**
@@ -943,9 +784,8 @@ Vector3D<Frame, T> operator-(const Vector3D<Frame, T>& v) {
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> operator-(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return internal::FramedVecOperator<Vector3D<Frame1, T>>::sub(a, b);
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    return internal::FramedVecOperator<Vector3D<Frame1, T>>::sub(a, b);
 }
 
 /**
@@ -1027,10 +867,10 @@ Vector3D<Frame, T> operator/(T a, const Vector3D<Frame, T>& b) {
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return Vector3D<Frame1, T>(a.y() * b.z() - a.z() * b.y(), a.z() * b.x() - a.x() * b.z(),
-                                   a.x() * b.y() - a.y() * b.x());
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    internal::FrameDirectionalAxisValidator<Frame1>::validate();
+    return Vector3D<Frame1, T>(a.y() * b.z() - a.z() * b.y(), a.z() * b.x() - a.x() * b.z(),
+                               a.x() * b.y() - a.y() * b.x());
 }
 
 /**
@@ -1048,9 +888,9 @@ Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> dot(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return T(a.x() * b.x() + a.y() * b.y() + a.z() * b.z());
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    internal::FrameDirectionalAxisValidator<Frame1>::validate();
+    return T(a.x() * b.x() + a.y() * b.y() + a.z() * b.z());
 }
 
 }  // namespace refx

@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include "../../frames/internal/frame_validators.h"
+#include "../../frames/internal/validators.h"
 #include "../../geometry/coordinate.h"
 #include "../../math/angles.h"
 #include "../../models/earth_model/earth_model.h"
