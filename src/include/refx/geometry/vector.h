@@ -106,11 +106,11 @@ struct Vector3D<ned, T> : public internal::VectorContainer3D<T> {
     T& down() { return this->z(); }
 
     /// @brief Provides const access to the North component.
-    const T& north() const { return this->x(); }
+    T north() const { return this->x(); }
     /// @brief Provides const access to the East component.
-    const T& east() const { return this->y(); }
+    T east() const { return this->y(); }
     /// @brief Provides const access to the Down component.
-    const T& down() const { return this->z(); }
+    T down() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -156,11 +156,11 @@ struct Vector3D<enu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the East component.
-    const T& east() const { return this->x(); }
+    T east() const { return this->x(); }
     /// @brief Provides const access to the North component.
-    const T& north() const { return this->y(); }
+    T north() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -207,11 +207,11 @@ struct Vector3D<nwu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the North component.
-    const T& north() const { return this->x(); }
+    T north() const { return this->x(); }
     /// @brief Provides const access to the West component.
-    const T& west() const { return this->y(); }
+    T west() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -311,7 +311,7 @@ struct Vector3D<lla, T> : public internal::VectorContainer3D<T> {
         return (unit == AngleUnit::Rad) ? deg2rad(this->y()) : this->y();
     }
     /// @brief Provides const access to the altitude difference component in **meters**.
-    const T& delta_altitude() const { return this->z(); }
+    T delta_altitude() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -412,7 +412,7 @@ struct Vector3D<lld, T> : public internal::VectorContainer3D<T> {
         return (unit == AngleUnit::Rad) ? deg2rad(this->y()) : this->y();
     }
     /// @brief Provides const access to the down difference component in **meters**.
-    const T& delta_down() const { return this->z(); }
+    T delta_down() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -512,7 +512,7 @@ struct Vector3D<aer, T> : public internal::VectorContainer3D<T> {
         return (unit == AngleUnit::Rad) ? deg2rad(this->y()) : this->y();
     }
     /// @brief Provides const access to the range difference component in **meters**.
-    const T& delta_range() const { return this->z(); }
+    T delta_range() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -559,11 +559,11 @@ struct Vector3D<frd, T> : public internal::VectorContainer3D<T> {
     T& down() { return this->z(); }
 
     /// @brief Provides const access to the Forward component.
-    const T& forward() const { return this->x(); }
+    T forward() const { return this->x(); }
     /// @brief Provides const access to the Right component.
-    const T& right() const { return this->y(); }
+    T right() const { return this->y(); }
     /// @brief Provides const access to the Down component.
-    const T& down() const { return this->z(); }
+    T down() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -610,11 +610,11 @@ struct Vector3D<ssh, T> : public internal::VectorContainer3D<T> {
     T& heave() { return this->z(); }
 
     /// @brief Provides const access to the Surge (forward) component.
-    const T& surge() const { return this->x(); }
+    T surge() const { return this->x(); }
     /// @brief Provides const access to the Sway (rightward) component.
-    const T& sway() const { return this->y(); }
+    T sway() const { return this->y(); }
     /// @brief Provides const access to the Heave (downward) component.
-    const T& heave() const { return this->z(); }
+    T heave() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -660,11 +660,11 @@ struct Vector3D<rfu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the Right component.
-    const T& right() const { return this->x(); }
+    T right() const { return this->x(); }
     /// @brief Provides const access to the Forward component.
-    const T& forward() const { return this->y(); }
+    T forward() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -711,11 +711,11 @@ struct Vector3D<flu, T> : public internal::VectorContainer3D<T> {
     T& up() { return this->z(); }
 
     /// @brief Provides const access to the Forward component.
-    const T& forward() const { return this->x(); }
+    T forward() const { return this->x(); }
     /// @brief Provides const access to the Left component.
-    const T& left() const { return this->y(); }
+    T left() const { return this->y(); }
     /// @brief Provides const access to the Up component.
-    const T& up() const { return this->z(); }
+    T up() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -748,9 +748,8 @@ struct Vector3D<flu, T> : public internal::VectorContainer3D<T> {
 
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> operator+(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return internal::FramedVecOperator<Vector3D<Frame1, T>>::add(a, b);
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    return internal::FramedVecOperator<Vector3D<Frame1, T>>::add(a, b);
 }
 
 /**
@@ -785,9 +784,8 @@ Vector3D<Frame, T> operator-(const Vector3D<Frame, T>& v) {
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> operator-(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return internal::FramedVecOperator<Vector3D<Frame1, T>>::sub(a, b);
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    return internal::FramedVecOperator<Vector3D<Frame1, T>>::sub(a, b);
 }
 
 /**
@@ -869,11 +867,10 @@ Vector3D<Frame, T> operator/(T a, const Vector3D<Frame, T>& b) {
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate() &&
-                  internal::FrameDirectionalAxisValidator<Frame1>::validate()) {
-        return Vector3D<Frame1, T>(a.y() * b.z() - a.z() * b.y(), a.z() * b.x() - a.x() * b.z(),
-                                   a.x() * b.y() - a.y() * b.x());
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    internal::FrameDirectionalAxisValidator<Frame1>::validate();
+    return Vector3D<Frame1, T>(a.y() * b.z() - a.z() * b.y(), a.z() * b.x() - a.x() * b.z(),
+                               a.x() * b.y() - a.y() * b.x());
 }
 
 /**
@@ -891,10 +888,9 @@ Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> dot(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate() &&
-                  internal::FrameDirectionalAxisValidator<Frame1>::validate()) {
-        return T(a.x() * b.x() + a.y() * b.y() + a.z() * b.z());
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    internal::FrameDirectionalAxisValidator<Frame1>::validate();
+    return T(a.x() * b.x() + a.y() * b.y() + a.z() * b.z());
 }
 
 }  // namespace refx

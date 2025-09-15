@@ -32,10 +32,10 @@ enum class ValidateCondition { AND, OR, XOR };
 
 template <typename frameA, typename frameB>
 struct FrameValidator {
-    static constexpr bool validate() {
+    // this function is evaluated at compile-time.
+    static void validate() {
         static_assert(std::is_same_v<frameA, frameB>,
                       "This operation is allowed only for object in the same frame.");
-        return true;
     }
 };
 
@@ -49,24 +49,41 @@ struct FrameValidator {
  */
 template <FrameTag tagA, FrameTag tagB, FrameTag tagC = tagA,
           ValidateCondition C = ValidateCondition::AND>
-struct FrameTagValidator {
+struct FrameTagValidator;
+
+// FrameTagValidator specializations
+template <FrameTag tagA, FrameTag tagB, FrameTag tagC>
+struct FrameTagValidator<tagA, tagB, tagC, ValidateCondition::AND> {
     /**
      * @brief Performs the compile-time check.
      */
-    static constexpr bool validate() {
-        if constexpr (C == ValidateCondition::AND) {
-            static_assert(tagA == tagC && tagB == tagC,
-                          "This operation is only allowed between frames of the same FrameTag.");
-            return true;
-        } else if constexpr (C == ValidateCondition::OR) {
-            static_assert(tagA == tagC || tagB == tagC,
-                          "This operation is only allowed between frames of the same FrameTag.");
-            return true;
-        } else {  // XOR
-            static_assert(tagA == tagC ^ tagB == tagC,
-                          "This operation is only allowed between frames of different tag.");
-            return true;
-        }
+    static void validate() {
+        static_assert(tagA == tagC && tagB == tagC,
+                      "This operation is only allowed between frames of the same FrameTag.");
+    }
+};
+
+template <FrameTag tagA, FrameTag tagB, FrameTag tagC>
+struct FrameTagValidator<tagA, tagB, tagC, ValidateCondition::OR> {
+    /**
+     * @brief Performs the compile-time check.
+     */
+    static void validate() {
+        static_assert(tagA == tagC || tagB == tagC,
+                      "This operation is only allowed when at least one among tagA and tagB is "
+                      "equal to tagC.");
+    }
+};
+
+template <FrameTag tagA, FrameTag tagB, FrameTag tagC>
+struct FrameTagValidator<tagA, tagB, tagC, ValidateCondition::XOR> {
+    /**
+     * @brief Performs the compile-time check.
+     */
+    static void validate() {
+        static_assert(
+            tagA == tagC ^ tagB == tagC,
+            "This operation is only allowed when only one between tagA and tagB is equal to tagC");
     }
 };
 
@@ -78,11 +95,10 @@ struct AxisValidator {
     /**
      * @brief Performs the compile-time check.
      */
-    static constexpr bool validate() {
+    static void validate() {
         static_assert(
             std::is_same_v<axisA, axisB>,
             "The two axis must be equal. Maybe you passed a frame with incompatible axis");
-        return true;
     }
 };
 
@@ -99,31 +115,43 @@ struct AxisValidator {
  * guiding them to use the more appropriate and efficient `frame_cast` API.
  */
 template <typename frameA, typename frameB = frameA, ValidateCondition C = ValidateCondition::AND>
-struct FrameSemanticAxisValidator {
+struct FrameSemanticAxisValidator;
+
+// FrameSemanticAxisValidator specializations
+template <typename frameA, typename frameB>
+struct FrameSemanticAxisValidator<frameA, frameB, ValidateCondition::AND> {
     /**
      * @brief Performs the compile-time check.
      */
-    static constexpr bool validate() {
-        if constexpr (C == ValidateCondition::AND) {
-            static_assert(is_semantic_axis_v<typename frameA::axis> &&
-                              is_semantic_axis_v<typename frameB::axis>,
-                          "This conversion is only allowed between semantic axis frames "
-                          "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
-            return true;
-        } else if constexpr (C == ValidateCondition::OR) {
-            static_assert(
-                is_semantic_axis_v<typename frameA::axis> ||
-                    is_semantic_axis_v<typename frameB::axis>,
-                "This conversion is only allowed whean at least one of the frames are semantic "
-                "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
-            return true;
-        } else {  // XOR
-            static_assert(is_semantic_axis_v<typename frameA::axis> !=
-                              is_semantic_axis_v<typename frameB::axis>,
-                          "This conversion is only allowed when only one the frames is semantic "
-                          "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
-            return true;
-        }
+    static void validate() {
+        static_assert(
+            is_semantic_axis_v<typename frameA::axis> && is_semantic_axis_v<typename frameB::axis>,
+            "This operation is only allowed between semantic axis frames "
+            "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
+    }
+};
+
+template <typename frameA, typename frameB>
+struct FrameSemanticAxisValidator<frameA, frameB, ValidateCondition::OR> {
+    /**
+     * @brief Performs the compile-time check.
+     */
+    static void validate() {
+        static_assert(
+            is_semantic_axis_v<typename frameA::axis> || is_semantic_axis_v<typename frameB::axis>,
+            "This operation is only allowed whean at least one of the frames are semantic "
+            "(Non-cartesian frame). Maybe you wanted to call the frame_cast API.");
+    }
+};
+template <typename frameA, typename frameB>
+struct FrameSemanticAxisValidator<frameA, frameB, ValidateCondition::XOR> {
+    /**
+     * @brief Performs the compile-time check.
+     */
+    static void validate() {
+        static_assert(
+            is_semantic_axis_v<typename frameA::axis> != is_semantic_axis_v<typename frameB::axis>,
+            "This operation is only allowed when only one the frames is semantic ");
     }
 };
 
@@ -139,30 +167,45 @@ struct FrameSemanticAxisValidator {
  * physical projections.
  */
 template <typename frameA, typename frameB = frameA, ValidateCondition C = ValidateCondition::AND>
-struct FrameDirectionalAxisValidator {
+struct FrameDirectionalAxisValidator;
+
+// FrameDirectionalAxisValidator specializations
+template <typename frameA, typename frameB>
+struct FrameDirectionalAxisValidator<frameA, frameB, ValidateCondition::AND> {
     /**
      * @brief Performs the compile-time check.
      */
-    static constexpr bool validate() {
-        if constexpr (C == ValidateCondition::AND) {
-            static_assert(is_directional_axis_v<typename frameA::axis> &&
-                              is_directional_axis_v<typename frameB::axis>,
-                          "This operation is only allowed between directional axis frames "
-                          "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
-            return true;
-        } else if constexpr (C == ValidateCondition::OR) {
-            static_assert(is_directional_axis_v<typename frameA::axis> ||
-                              is_directional_axis_v<typename frameB::axis>,
-                          "This operation is only allowed between directional axis frames "
-                          "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
-            return true;
-        } else {  // XOR
-            static_assert(is_directional_axis_v<typename frameA::axis> !=
-                              is_directional_axis_v<typename frameB::axis>,
-                          "This operation is only allowed when only one the frames is directional "
-                          "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
-            return true;
-        }
+    static void validate() {
+        static_assert(is_directional_axis_v<typename frameA::axis> &&
+                          is_directional_axis_v<typename frameB::axis>,
+                      "This operation is only allowed between directional axis frames "
+                      "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
+    }
+};
+
+template <typename frameA, typename frameB>
+struct FrameDirectionalAxisValidator<frameA, frameB, ValidateCondition::OR> {
+    /**
+     * @brief Performs the compile-time check.
+     */
+    static void validate() {
+        static_assert(is_directional_axis_v<typename frameA::axis> ||
+                          is_directional_axis_v<typename frameB::axis>,
+                      "This operation is only allowed between directional axis frames "
+                      "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
+    }
+};
+
+template <typename frameA, typename frameB>
+struct FrameDirectionalAxisValidator<frameA, frameB, ValidateCondition::XOR> {
+    /**
+     * @brief Performs the compile-time check.
+     */
+    static void validate() {
+        static_assert(is_directional_axis_v<typename frameA::axis> !=
+                          is_directional_axis_v<typename frameB::axis>,
+                      "This operation is only allowed when only one the frames is directional "
+                      "(Cartesian frame). Maybe you wanted to call the frame_transform API.");
     }
 };
 

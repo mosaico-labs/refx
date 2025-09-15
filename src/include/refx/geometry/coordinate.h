@@ -128,7 +128,7 @@ struct Coordinate3D<lla, T> : public internal::VectorContainer3D<T> {
      * @brief Provides const access to the Altitude component.
      * @return The altitude value in **meters**.
      */
-    const T& altitude() const { return this->z(); }
+    T altitude() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -209,7 +209,7 @@ struct Coordinate3D<lld, T> : public internal::VectorContainer3D<T> {
      * @brief Provides const access to the Down/Depth component.
      * @return The down value in **meters**.
      */
-    const T& down() const { return this->z(); }
+    T down() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -293,7 +293,7 @@ struct Coordinate3D<aer, T> : public internal::VectorContainer3D<T> {
      * @brief Provides const access to the Range component.
      * @return The range value in **meters**.
      */
-    const T& range() const { return this->z(); }
+    T range() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.
@@ -319,8 +319,8 @@ template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a,
                                   const Coordinate3D<Frame2, T>& b) {
     static_assert(false,
-                  "The summation between two Coordinates3D is not allowed. Check the documentation "
-                  "for details.");
+                  "The summation between two Coordinate3D is not allowed. Maybe you wanted to sum "
+                  "two Vector3D. Check the documentation for details.");
 }
 
 /**
@@ -344,9 +344,8 @@ template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> operator-(const Coordinate3D<Frame1, T>& a, const Coordinate3D<Frame2, T>& b) {
     // The subtraction of two Vector3D objects will correctly invoke the
     // specialized arithmetic defined by FramedVecOperator, which uses FrameTraits.
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        return Vector3D<Frame1, T>(a.data()) - Vector3D<Frame2, T>(b.data());
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    return Vector3D<Frame1, T>(a.data()) - Vector3D<Frame2, T>(b.data());
 }
 
 /**
@@ -367,10 +366,9 @@ Vector3D<Frame1, T> operator-(const Coordinate3D<Frame1, T>& a, const Coordinate
 template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
     // The addition will correctly invoke the specialized arithmetic from FramedVecOperator.
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        const auto& res = Vector3D<Frame1, T>(a.data()) + b;
-        return {res.x(), res.y(), res.z()};
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    const auto& res = Vector3D<Frame1, T>(a.data()) + b;
+    return {res.x(), res.y(), res.z()};
 }
 
 /**
@@ -383,10 +381,9 @@ Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a, const Vector
  */
 template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Vector3D<Frame1, T>& a, const Coordinate3D<Frame2, T>& b) {
-    if constexpr (internal::FrameValidator<Frame1, Frame2>::validate()) {
-        // Forward the call to the canonical version.
-        return b + a;
-    }
+    internal::FrameValidator<Frame1, Frame2>::validate();
+    // Forward the call to the canonical version.
+    return b + a;
 }
 
 }  // namespace refx

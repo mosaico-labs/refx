@@ -326,7 +326,7 @@ which implements the mathematical formula:
 and the pose composition operator
 
 ```cpp
-Transformation<A, C, T> operator*(const Transformation<A, B, T>&, const Transformation<B, C, T>&)
+Transformation<FrameA, FrameC, T> operator*(const Transformation<FrameA, FrameB, T>&, const Transformation<FrameB, FrameC, T>&)
 ```
 
 which implements the mathematical formula: 
@@ -732,9 +732,13 @@ struct Vector3D<my_robot::laser_scanner, T> : public internal::VectorContainer3D
         : internal::VectorContainer3D<T>({forward, left, up}) {}
 
     // --- Semantic Accessors ---
-    const T& laser_front() const { return this->x(); }
-    const T& laser_side() const { return this->y(); }
-    const T& laser_up() const { return this->z(); }
+    T& laser_front() { return this->x(); }
+    T& laser_side() { return this->y(); }
+    T& laser_up() { return this->z(); }
+
+    T laser_front() const { return this->x(); }
+    T laser_side() const { return this->y(); }
+    T laser_up() const { return this->z(); }
 };
 
 }  // namespace refx

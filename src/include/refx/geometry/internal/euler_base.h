@@ -43,11 +43,11 @@ struct EulerBase : public VectorContainer3D<T> {
     T& angle_z() { return this->z(); }
 
     /// @brief Provides const access to the angle for rotation about the X-axis.
-    const T& angle_x() const { return this->x(); }
+    T angle_x() const { return this->x(); }
     /// @brief Provides const access to the angle for rotation about the Y-axis.
-    const T& angle_y() const { return this->y(); }
+    T angle_y() const { return this->y(); }
     /// @brief Provides const access to the angle for rotation about the Z-axis.
-    const T& angle_z() const { return this->z(); }
+    T angle_z() const { return this->z(); }
 
     /**
      * @brief Provides const access to the underlying data container.

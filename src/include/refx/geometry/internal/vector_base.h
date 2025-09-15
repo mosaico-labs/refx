@@ -115,7 +115,7 @@ struct VectorContainerXD {
     /// @brief Provides mutable access to a component by its index.
     T& operator[](std::size_t i) { return data[i]; }
     /// @brief Provides const access to a component by its index.
-    const T& operator[](std::size_t i) const { return data[i]; }
+    T operator[](std::size_t i) const { return data[i]; }
 
     // --- Iterators ---
 
@@ -207,11 +207,11 @@ struct VectorContainer3D : public VectorContainerXD<3, T> {
     T& z() { return this->data[2]; }
 
     /// @brief Provides const access to the first component (X).
-    const T& x() const { return this->data[0]; }
+    T x() const { return this->data[0]; }
     /// @brief Provides const access to the second component (Y).
-    const T& y() const { return this->data[1]; }
+    T y() const { return this->data[1]; }
     /// @brief Provides const access to the third component (Z).
-    const T& z() const { return this->data[2]; }
+    T z() const { return this->data[2]; }
 };
 
 /**
@@ -256,13 +256,13 @@ struct VectorContainer4D : public VectorContainerXD<4, T> {
     T& w() { return this->data[3]; }
 
     /// @brief Provides const access to the first component (X).
-    const T& x() const { return this->data[0]; }
+    T x() const { return this->data[0]; }
     /// @brief Provides const access to the second component (Y).
-    const T& y() const { return this->data[1]; }
+    T y() const { return this->data[1]; }
     /// @brief Provides const access to the third component (Z).
-    const T& z() const { return this->data[2]; }
+    T z() const { return this->data[2]; }
     /// @brief Provides const access to the fourth component (W).
-    const T& w() const { return this->data[3]; }
+    T w() const { return this->data[3]; }
 };
 }  // namespace internal
 }  // namespace refx

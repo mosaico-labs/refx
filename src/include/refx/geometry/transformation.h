@@ -101,9 +101,8 @@ template <typename FrameA, typename FrameB, typename FrameC, template <class, cl
           typename T>
 VecType<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>& T_A_B,
                              const VecType<FrameC, T>& V) {
-    if constexpr (internal::FrameValidator<FrameB, FrameC>::validate()) {
-        return VecType<FrameA, T>(T_A_B.rotation * V + T_A_B.translation);
-    }
+    internal::FrameValidator<FrameB, FrameC>::validate();
+    return VecType<FrameA, T>(T_A_B.rotation * V + T_A_B.translation);
 }
 
 /**
@@ -117,18 +116,18 @@ VecType<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>& T_A_B,
  * composed if the `ToFrame` of the right-hand side matches the `FromFrame` of the
  * left-hand side.
  *
- * @tparam A The final destination frame (e.g., world).
- * @tparam B The intermediate frame (e.g., vehicle).
- * @tparam C The original source frame (e.g., camera).
+ * @tparam FrameA The final destination frame (e.g., world).
+ * @tparam FrameB The intermediate frame (e.g., vehicle).
+ * @tparam FrameC The original source frame (e.g., camera).
  * @tparam T The underlying scalar type.
  * @param T_A_B The transformation from frame B to frame A.
  * @param T_B_C The transformation from frame C to frame B.
  * @return A new Transformation object of type `Transformation<A, C, T>` representing
  * the direct transformation from frame C to frame A.
  */
-template <typename A, typename B, typename C, typename T>
-Transformation<A, C, T> operator*(const Transformation<A, B, T>& T_A_B,
-                                  const Transformation<B, C, T>& T_B_C) {
+template <typename FrameA, typename FrameB, typename FrameC, typename T>
+Transformation<FrameA, FrameC, T> operator*(const Transformation<FrameA, FrameB, T>& T_A_B,
+                                            const Transformation<FrameB, FrameC, T>& T_B_C) {
     return {T_A_B.rotation * T_B_C.rotation,
             T_A_B.rotation * T_B_C.translation + T_A_B.translation};
 }

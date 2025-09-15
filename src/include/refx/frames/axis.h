@@ -84,7 +84,7 @@ enum class AxisDomain {
      * (e.g., `[-pi/2°, +pi/2°]`).
      * @details Arithmetic operations may involve clamping or normalization.
      */
-    WrappedAngularPi_2,
+    WrappedAngularPi2,
 
     /**
      * @brief An angular component that wraps around at `±pi°`.
@@ -98,7 +98,7 @@ enum class AxisDomain {
      * range `[0°, 2*pi°)`.
      * @details Arithmetic involves modulo operations to handle the wrap-around.
      */
-    WrappedAngular2_Pi
+    WrappedAngular2Pi
 };
 
 //==============================================================================
