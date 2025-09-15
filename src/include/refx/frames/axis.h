@@ -54,7 +54,7 @@ enum class AxisDomain {
     Linear,
 
     /**
-     * @brief An angular component that is clamped to a 180-degree total range
+     * @brief An angular component that is clamped to a 90-degree total range
      * (e.g., `[-90°, +90°]`).
      * @details Arithmetic operations may involve clamping or normalization.
      * Example: Geodetic latitude, Elevation.
@@ -75,7 +75,30 @@ enum class AxisDomain {
      * @details Arithmetic involves modulo operations to handle the wrap-around.
      * Example: Azimuth.
      */
-    WrappedAngular360
+    WrappedAngular360,
+
+    // --------- Radians ---------
+
+    /**
+     * @brief An angular component that is clamped to a pi/2 total range
+     * (e.g., `[-pi/2°, +pi/2°]`).
+     * @details Arithmetic operations may involve clamping or normalization.
+     */
+    WrappedAngularPi_2,
+
+    /**
+     * @brief An angular component that wraps around at `±pi°`.
+     * @details Arithmetic on this component, especially subtraction, must use
+     * shortest-angle logic to handle the discontinuity.
+     */
+    WrappedAngularPi,
+
+    /**
+     * @brief An angular component that wraps around at `2*pi`, typically in the
+     * range `[0°, 2*pi°)`.
+     * @details Arithmetic involves modulo operations to handle the wrap-around.
+     */
+    WrappedAngular2_Pi
 };
 
 //==============================================================================

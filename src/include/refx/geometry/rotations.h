@@ -208,9 +208,9 @@ template <typename T>
 struct EulerAngles<EulerSequence::ZYX, T> : public internal::EulerBase<T> {
     /// @brief Defines the angle range of each angle
     static constexpr AxisDomain angles_wrap[3] = {
-        AxisDomain::WrappedAngular180,  ///< Roll wraps around [-180°, 180°].
-        AxisDomain::WrappedAngular90,   ///< Pitch wraps around at [-90°, 90°].
-        AxisDomain::WrappedAngular180   ///< Yaw wraps around [-180°, 180°].
+        AxisDomain::WrappedAngularPi,    ///< Roll wraps around [-pi, pi].
+        AxisDomain::WrappedAngularPi_2,  ///< Pitch wraps around at [-pi/2, pi/2].
+        AxisDomain::WrappedAngularPi     ///< Yaw wraps around [-pi, pi].
     };
     /// @brief Defines the axis rotation order
     static constexpr AxisOrder axis_order[3] = {
@@ -253,9 +253,9 @@ template <typename T>
 struct EulerAngles<EulerSequence::ZXY, T> : public internal::EulerBase<T> {
     /// @brief Defines the angle range of each angle
     static constexpr AxisDomain angles_wrap[3] = {
-        AxisDomain::WrappedAngular90,   ///< ang_x (2nd angle) wraps around at [-90°, 90°].
-        AxisDomain::WrappedAngular180,  ///< ang_y (3rd angle) wraps around [-180°, 180°].
-        AxisDomain::WrappedAngular180   ///< ang_z (1st angle) wraps around [-180°, 180°].
+        AxisDomain::WrappedAngularPi_2,  ///< ang_x (2nd angle) wraps around at [-pi/2, pi/2].
+        AxisDomain::WrappedAngularPi,    ///< ang_y (3rd angle) wraps around [-pi, pi].
+        AxisDomain::WrappedAngularPi     ///< ang_z (1st angle) wraps around [-pi, pi].
     };
     /// @brief Defines the axis rotation order
     static constexpr AxisOrder axis_order[3] = {
@@ -277,9 +277,9 @@ template <typename T>
 struct EulerAngles<EulerSequence::YZX, T> : public internal::EulerBase<T> {
     /// @brief Defines the angle range of each angle
     static constexpr AxisDomain angles_wrap[3] = {
-        AxisDomain::WrappedAngular180,  ///< ang_x (3rd angle) wraps around at [-90°, 90°].
-        AxisDomain::WrappedAngular180,  ///< ang_y (1st angle) wraps around [-180°, 180°].
-        AxisDomain::WrappedAngular90    ///< ang_z (2nd angle) wraps around [-180°, 180°].
+        AxisDomain::WrappedAngularPi,   ///< ang_x (3rd angle) wraps around at [-pi, pi].
+        AxisDomain::WrappedAngularPi,   ///< ang_y (1st angle) wraps around [-pi, pi].
+        AxisDomain::WrappedAngularPi_2  ///< ang_z (2nd angle) wraps around [-pi/2, pi/2].
     };
     /// @brief Defines the axis rotation order
     static constexpr AxisOrder axis_order[3] = {
@@ -301,9 +301,9 @@ template <typename T>
 struct EulerAngles<EulerSequence::YXZ, T> : public internal::EulerBase<T> {
     /// @brief Defines the angle range of each angle
     static constexpr AxisDomain angles_wrap[3] = {
-        AxisDomain::WrappedAngular90,   ///< ang_x (2nd angle) wraps around at [-90°, 90°].
-        AxisDomain::WrappedAngular180,  ///< ang_y (1st angle) wraps around [-180°, 180°].
-        AxisDomain::WrappedAngular180   ///< ang_z (3rd angle) wraps around [-180°, 180°].
+        AxisDomain::WrappedAngularPi_2,  ///< ang_x (2nd angle) wraps around at [-pi/2, pi/2].
+        AxisDomain::WrappedAngularPi,    ///< ang_y (1st angle) wraps around [-pi, pi].
+        AxisDomain::WrappedAngularPi     ///< ang_z (3rd angle) wraps around [-pi, pi].
     };
     /// @brief Defines the axis rotation order
     static constexpr AxisOrder axis_order[3] = {
@@ -326,9 +326,9 @@ template <typename T>
 struct EulerAngles<EulerSequence::XZY, T> : public internal::EulerBase<T> {
     /// @brief Defines the angle range of each angle
     static constexpr AxisDomain angles_wrap[3] = {
-        AxisDomain::WrappedAngular180,  ///< ang_x (1st angle) wraps around at [-90°, 90°].
-        AxisDomain::WrappedAngular180,  ///< ang_y (3rd angle) wraps around [-180°, 180°].
-        AxisDomain::WrappedAngular90    ///< ang_z (2nd angle) wraps around [-180°, 180°].
+        AxisDomain::WrappedAngularPi,   ///< ang_x (1st angle) wraps around at [-pi, pi].
+        AxisDomain::WrappedAngularPi,   ///< ang_y (3rd angle) wraps around [-pi, pi].
+        AxisDomain::WrappedAngularPi_2  ///< ang_z (2nd angle) wraps around [-pi/2, pi/2].
     };
     /// @brief Defines the axis rotation order
     static constexpr AxisOrder axis_order[3] = {
@@ -351,9 +351,9 @@ template <typename T>
 struct EulerAngles<EulerSequence::XYZ, T> : public internal::EulerBase<T> {
     /// @brief Defines the angle range of each angle
     static constexpr AxisDomain angles_wrap[3] = {
-        AxisDomain::WrappedAngular180,  ///< ang_x (1st angle) wraps around at [-90°, 90°].
-        AxisDomain::WrappedAngular90,   ///< ang_y (2nd angle) wraps around [-180°, 180°].
-        AxisDomain::WrappedAngular180   ///< ang_z (3rd angle) wraps around [-180°, 180°].
+        AxisDomain::WrappedAngularPi,    ///< ang_x (1st angle) wraps around at [-pi, pi].
+        AxisDomain::WrappedAngularPi_2,  ///< ang_y (2nd angle) wraps around [-pi/2, pi/2].
+        AxisDomain::WrappedAngularPi     ///< ang_z (3rd angle) wraps around [-pi, pi].
     };
     /// @brief Defines the axis rotation order
     static constexpr AxisOrder axis_order[3] = {
