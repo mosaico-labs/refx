@@ -23,7 +23,7 @@ This library is intended for robotics engineers, researchers, and students worki
   * **Compile-Time Dispatch**: A powerful template-based system automatically selects the correct mathematical logic for linear vs. angular coordinates, ensuring correctness for geodetic calculations.
 
 ## Ecosystem Integration
-refx is designed to be a self-contained, lightweight library. However, for maximum utility, it provides optional, first-class support for [Eigen3](docs/md/doc.md#appendix-eigen3-integration). 
+refx is designed to be a self-contained, lightweight library. However, for maximum utility, it provides optional, first-class support for **Eigen3**.
 
 ## Installation
 Here's the code you'd add to your project's `CMakeLists.txt` file to import the refx library.
@@ -143,11 +143,6 @@ Target GPS in Local NED Frame (from ecef origin): [22.2145, 16.5955, -10] (meter
 ## Documentation
 
 Read the [Full Documentation](https://mosaico-labs.github.io/refx-doc/doc).
-
-<!-- >
-## Architecture and Design
-See the [Architecture & Design](docs/md/arch.md) section, for understanding the technical core philosophy and design patterns that make refx type-safe, scalable, and extensible.
-< -->
 
 ## Cookbook
 
