@@ -142,7 +142,7 @@ Target GPS in Local NED Frame (from ecef origin): [22.2145, 16.5955, -10] (meter
 
 ## Documentation
 
-Read the [documentation](docs/md/doc.md) for usage examples and API reference.
+Read the [Full Documentation](https://mosaico-labs.github.io/refx-doc/doc).
 
 <!-- >
 ## Architecture and Design
