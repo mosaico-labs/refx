@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include "my_robot_frames.h"
+
 using namespace refx;
 namespace cookbook {
 
@@ -20,21 +22,34 @@ void test_recipe_relative_to_global() {
         Rotation<ned, frd>(YawPitchRoll<double>(deg2rad(-45.0), 0.0, 0.0));
 
     // --------- Step 2: Define the Sensor Measurement --------- //
-    auto target_position_relative = Coordinate3D<frd>(75.0, -10.0, 0.0);
+    // The complete pose of the radar wrt body frame (relative mounting)
+    auto T_frd_radar = refx::Transformation<refx::frd, my_robot::radar>(
+        Rotation<refx::frd, my_robot::radar>(
+            YawPitchRoll<double>(refx::deg2rad(2.0), -refx::deg2rad(1.5), 0.0)),
+        refx::Vector3D<refx::frd>(1.0, -0.3, 0.15));
 
-    std::cout << "Target position relative (Body): " << target_position_relative << std::endl;
+    // The radar detects the target 75 meters directly in front of us
+    // and 10 meters to the left.
+    auto target_position_relative = Coordinate3D<my_robot::radar>(75.0, -10.0, 0.0);
+    // The radar measurement in the body frame
+    auto target_position_relative_body = T_frd_radar * target_position_relative;
+
+    std::cout << "Target position relative (Body): " << target_position_relative_body << " [m]"
+              << std::endl;
 
     // --------- Step 3: Convert and Transform --------- //
     Coordinate3D<ned> target_position_relative_ned =
-        ego_orientation_global * target_position_relative;
+        ego_orientation_global * target_position_relative_body;
 
-    std::cout << "Target position relative (NED): " << target_position_relative_ned << std::endl;
+    std::cout << "Target position relative (NED): " << target_position_relative_ned << " [m]"
+              << std::endl;
 
     Coordinate3D<lla> target_position_global = frame_transform<lla>(
         target_position_relative_ned, ego_position_global, EarthModelWGS84<double>());
 
     // We can now use target_position_global for navigation, tracking, etc.
-    std::cout << "Target's Absolute Position (LLA): " << target_position_global << std::endl;
+    std::cout << "Target's Absolute Position (LLA): " << target_position_global << " [m]"
+              << std::endl;
 }
 
 /// @brief Implementation of the code in the Recipe: 'IMU Measurements Compensation for Navigation
@@ -49,13 +64,15 @@ void test_recipe_imu_comp() {
         refx::YawPitchRoll<double>(0.0, refx::deg2rad(5.0), refx::deg2rad(2.0)));
 
     // --------- Step 2: Get Raw IMU Measurements --------- //
-    // Raw accelerometer reading (m/s^2)
+    refx::Rotation<refx::frd, refx::imu> R_body_imu;  // this is the identity rotation
+
+    // Raw accelerometer reading in body frame (m/s^2)
     // Note that the sensed gravity is with the minus sign: the gravity in the accelerometers
     // reading acts as an apparent acceleration, directed toward up
-    auto accel_raw = refx::Vector3D<refx::frd>(0.85, 0.1, -9.75);
+    auto accel_raw_body = R_body_imu * refx::Vector3D<refx::imu>(0.85, 0.1, -9.75);
 
-    // Raw gyroscope reading (rad/s)
-    auto gyro_raw = refx::Vector3D<refx::frd>(0.01, -0.02, 0.03);
+    // Raw gyroscope reading in body frame (rad/s)
+    auto gyro_raw_body = R_body_imu * refx::Vector3D<refx::imu>(0.01, -0.02, 0.03);
 
     // --------- Step 3: Correct the Accelerometer for Gravity --------- //
     // Instantiate the Earth model
@@ -67,13 +84,13 @@ void test_recipe_imu_comp() {
         refx::Vector3D<refx::ned>(0.0, 0.0, earth_model.gravity(current_position));
 
     // 2. Rotate the gravity vector into the vehicle's body (FRD) frame.
-    //    We need the inverse rotation to go from NED -> FRD.
+    // We need the inverse rotation to go from NED -> FRD.
     // The minus sign on the body gravity is justified to account for the apparent nature of gravity
     // acceleration on the accelerometers reading
-    auto gravity_in_frd = R_ned_from_frd.inverse() * gravity_in_ned;
+    auto gravity_in_frd = -(R_ned_from_frd.inverse() * gravity_in_ned);
 
     // 3. Compensate the gravity from the accelerometer, to get the true linear acceleration.
-    auto linear_accel_true = accel_raw + gravity_in_frd;
+    auto linear_accel_true = accel_raw_body - gravity_in_frd;
 
     // --------- Step 4: Correct the Gyroscope for Earth's Rotatio --------- //
 
@@ -105,10 +122,11 @@ void test_recipe_imu_comp() {
     auto earth_rate_in_frd = R_ned_from_frd.inverse() * R_ecef_to_ned * earth_rate_in_ecef;
 
     // 3. Subtract the Earth rate to get the vehicle's true angular velocity relative to the Earth.
-    auto angular_velocity_true = gyro_raw - earth_rate_in_frd;
+    auto angular_velocity_true = gyro_raw_body - earth_rate_in_frd;
 
-    std::cout << "Corrected Linear Accel (FRD): " << linear_accel_true << std::endl;
-    std::cout << "Corrected Angular Velocity (FRD): " << angular_velocity_true << std::endl;
+    std::cout << "Corrected Linear Accel (FRD): " << linear_accel_true << " [m/s^2]" << std::endl;
+    std::cout << "Corrected Angular Velocity (FRD): " << angular_velocity_true << " [m/s^2]"
+              << std::endl;
 }
 }  // namespace cookbook
 #endif /* _INCLUDE_COOKBOOK_ */

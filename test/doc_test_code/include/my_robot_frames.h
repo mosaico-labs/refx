@@ -14,6 +14,14 @@ struct laser_scanner {
     static constexpr refx::FrameTag tag = refx::FrameTag::Sensor;
 };
 
+// A custom frame for a radar sensor in in forward-right-down axis configuration
+struct radar {
+    static constexpr auto name = "radar";
+    // Use a standard DirectionalAxis (Cartesian)
+    using axis = refx::axis_frd;
+    static constexpr refx::FrameTag tag = refx::FrameTag::Sensor;
+};
+
 }  // namespace my_robot
 
 #endif /* _INCLUDE_MY_ROBOT_FRAMES_ */

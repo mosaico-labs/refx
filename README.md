@@ -5,6 +5,12 @@
 > [!WARNING]
 > refx is still in development (0.x.y) and API interface may change between minor revisions. Please use the releases packages for direct import or specify a commit tag if you are using refx with CMake `FetchContent`
 
+## Documentation
+
+Read the **[Full Documentation](https://mosaico-labs.github.io/refx-doc)**, to dive in — explore APIs and classes to help you build and contribute faster.
+
+For a collection of practical, real-world recipes designed to help you solve common problems in robotics and navigation, read ***The refx [Cookbook](https://mosaico-labs.github.io/refx-doc/cookbook)***.
+
 ## Who is this for?
 
 This library is intended for robotics engineers, researchers, and students working on applications that require a high degree of navigational accuracy and reliability, such as:
@@ -139,14 +145,6 @@ Local Origin in ECEF: [4.64162e+06, 1.02872e+06, 4.23761e+06]
 Target GPS in Local NED Frame: [22.2145, 16.5955, -10] (meters)
 Target GPS in Local NED Frame (from ecef origin): [22.2145, 16.5955, -10] (meters)
 ```
-
-## Documentation
-
-Read the [Full Documentation](https://mosaico-labs.github.io/refx-doc/doc).
-
-## Cookbook
-
-Read the refx [Cookbook](docs/md/cookbook/main.md) for a collection of practical, real-world recipes designed to help you solve common problems in robotics and navigation.
 
 ## License
 
