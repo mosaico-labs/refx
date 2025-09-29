@@ -887,7 +887,7 @@ Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T
  * A compile-time error will occur if `a` and `b` have different frame types.
  */
 template <typename Frame1, typename Frame2, typename T>
-Vector3D<Frame1, T> dot(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
+T dot(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
     internal::FrameValidator<Frame1, Frame2>::validate();
     internal::FrameDirectionalAxisValidator<Frame1>::validate();
     return T(a.x() * b.x() + a.y() * b.y() + a.z() * b.z());
