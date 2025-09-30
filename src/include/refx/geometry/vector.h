@@ -878,8 +878,8 @@ Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T
  *
  * @tparam Frame The shared reference frame of the vectors.
  * @tparam T The scalar type.
- * @param a The left-hand side vector in the cross product (`a x b`).
- * @param b The right-hand side vector in the cross product (`a x b`).
+ * @param a The left-hand side vector in the dot product (`a · b`).
+ * @param b The right-hand side vector in the dot product (`a · b`).
  * @return a scalar representing the dot product `a . b`.
  * @warning This operation is only physically meaningful for vectors in Cartesian
  * reference frames (e.g., `NED`, `FRD`, `ECEF`). Using it on non-Cartesian types
@@ -887,7 +887,7 @@ Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T
  * A compile-time error will occur if `a` and `b` have different frame types.
  */
 template <typename Frame1, typename Frame2, typename T>
-Vector3D<Frame1, T> dot(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
+T dot(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
     internal::FrameValidator<Frame1, Frame2>::validate();
     internal::FrameDirectionalAxisValidator<Frame1>::validate();
     return T(a.x() * b.x() + a.y() * b.y() + a.z() * b.z());

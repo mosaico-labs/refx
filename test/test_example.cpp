@@ -6,6 +6,7 @@
 #include "include/geometry/test_rotation.hpp"
 #include "include/geometry/test_transformation.hpp"
 #include "include/geometry/test_vector_coordinate.hpp"
+#include "include/geometry/test_vector_operations.hpp"
 
 //
 // ---------------------- Earth Model Testing ----------------------
