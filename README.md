@@ -32,6 +32,8 @@ This library is intended for robotics engineers, researchers, and students worki
 refx is designed to be a self-contained, lightweight library. However, for maximum utility, it provides optional, first-class support for **Eigen3**.
 
 ## Installation
+
+### CMake
 Here's the code you'd add to your project's `CMakeLists.txt` file to import the refx library.
 ```cmake
 include(FetchContent)
@@ -47,6 +49,11 @@ From this point on, the `refx::refx` target is available to your project and thi
 ```cmake
 target_link_libraries(my_target PRIVATE refx::refx)
 ```
+
+### Conan
+You can install refx using Conan via the [valgur/conan-center-index](https://github.com/valgur/conan-center-index) repository.
+
+Special thanks to [@valgur](https://github.com/valgur) for adding Conan support.
 
 ## Requirements
 Developing with refx requires only a C++17 compatible compiler, running tests requires Google Test as dependency (downloaded automatically by CMake).
