@@ -51,7 +51,11 @@ target_link_libraries(my_target PRIVATE refx::refx)
 ```
 
 ### Conan
-You can install refx using Conan via the [valgur/conan-center-index](https://github.com/valgur/conan-center-index) repository.
+You can install refx using Conan via the [klin](https://github.com/conan-kiln/kiln) repository.
+
+- Set up Conan Kiln as a remote following the [instructions](https://github.com/conan-kiln/kiln#setup)
+- Include `refx/[>=0.2.1 <1]` as a requirement under your `conanfile.txt` or `conanfile.py`.
+- Follow the regular [instructions](https://docs.conan.io/2/tutorial.html) for integrating Conan packages into your project
 
 Special thanks to [@valgur](https://github.com/valgur) for adding Conan support.
 
