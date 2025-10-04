@@ -200,8 +200,9 @@ struct FramedVecOperator {
      * @return The resulting `FramedVecType`.
      */
     static FramedVecType scalar_div(T a, const FramedVecType& b) {
-        // Division is commutative, so we can reuse the other implementation.
-        return scalar_div(b, a);
+        return {apply<FrameTraits<Frame>::axis[0]>(a, b.x(), OpType::Div),
+                apply<FrameTraits<Frame>::axis[1]>(a, b.y(), OpType::Div),
+                apply<FrameTraits<Frame>::axis[2]>(a, b.z(), OpType::Div)};
     }
 };
 
