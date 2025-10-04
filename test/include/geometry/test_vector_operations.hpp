@@ -40,6 +40,26 @@ TEST_F(VectorOperationsTest, DotProductScalarResult) {
     EXPECT_NEAR(parallel_dot, 2.0, HARD_TOLERANCE);  // 1 * 2 = 2
 }
 
+// Test scalar division operations (vector / scalar and scalar / vector)
+TEST_F(VectorOperationsTest, ScalarDivision) {
+    // Test vector / scalar
+    Vector3D<ned, double> v_div{4.0, 8.0, 2.0};
+    auto result_vec_div_scalar = v_div / 2.0;
+
+    // Verify: Vector3D(4, 8, 2) / 2.0 = Vector3D(2, 4, 1)
+    EXPECT_NEAR(result_vec_div_scalar.north(), 2.0, HARD_TOLERANCE);
+    EXPECT_NEAR(result_vec_div_scalar.east(), 4.0, HARD_TOLERANCE);
+    EXPECT_NEAR(result_vec_div_scalar.down(), 1.0, HARD_TOLERANCE);
+
+    // Test scalar / vector (element-wise: result[i] = scalar / vector[i])
+    auto result_scalar_div_vec = 2.0 / v_div;
+
+    // Verify: 2.0 / Vector3D(4, 8, 2) = Vector3D(0.5, 0.25, 1.0)
+    EXPECT_NEAR(result_scalar_div_vec.north(), 0.5, HARD_TOLERANCE);
+    EXPECT_NEAR(result_scalar_div_vec.east(), 0.25, HARD_TOLERANCE);
+    EXPECT_NEAR(result_scalar_div_vec.down(), 1.0, HARD_TOLERANCE);
+}
+
 }  // namespace testing
 }  // namespace refx
 
