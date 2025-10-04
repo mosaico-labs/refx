@@ -13,6 +13,11 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU
     add_compile_options(-Wall)
 endif()
 
+# Enable math constants (M_PI, M_PI_2, etc.) on MSVC/Windows
+if (MSVC OR WIN32)
+    add_compile_definitions(_USE_MATH_DEFINES)
+endif()
+
 # Enable/Disable Eigen Detection
 set(REFX_ENABLE_EIGEN_DETECTION ON CACHE BOOL "Enable the dection of Eigen3 Library")
  
