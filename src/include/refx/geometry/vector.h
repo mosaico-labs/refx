@@ -836,21 +836,6 @@ Vector3D<Frame, T> operator/(const Vector3D<Frame, T>& a, T b) {
 }
 
 /**
- * @brief Performs trait-aware, element-wise scalar division (scalar / vector).
- * @details This is an element-wise operation: `result[i] = a / b[i]`.
- * @tparam Frame The reference frame of the vector.
- * @tparam T The scalar type.
- * @param a The scalar dividend.
- * @param b The vector divisor.
- * @return A new `Vector3D<Frame, T>` containing the element-wise result.
- * @note This function does not check for division by zero in any of the vector's components.
- */
-template <typename Frame, typename T>
-Vector3D<Frame, T> operator/(T a, const Vector3D<Frame, T>& b) {
-    return internal::FramedVecOperator<Vector3D<Frame, T>>::scalar_div(a, b);
-}
-
-/**
  * @brief Computes the geometric cross product of two vectors.
  * @details The cross product produces a new vector that is orthogonal to both input
  * vectors, following the right-hand rule.

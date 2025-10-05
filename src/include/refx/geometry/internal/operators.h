@@ -191,18 +191,6 @@ struct FramedVecOperator {
                 apply<FrameTraits<Frame>::axis[1]>(a.y(), b, OpType::Div),
                 apply<FrameTraits<Frame>::axis[2]>(a.z(), b, OpType::Div)};
     }
-
-    /**
-     * @brief Performs trait-aware, component-wise division (scalar / vector).
-     * @details This is an element-wise operation: `result[i] = a / b[i]`.
-     * @param a The scalar dividend.
-     * @param b The vector divisor.
-     * @return The resulting `FramedVecType`.
-     */
-    static FramedVecType scalar_div(T a, const FramedVecType& b) {
-        // Division is commutative, so we can reuse the other implementation.
-        return scalar_div(b, a);
-    }
 };
 
 }  // namespace internal
