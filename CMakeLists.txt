@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15...4.0)
 
 project(refx VERSION 0.1.0
-             DESCRIPTION "refx - C++ core library for geographic and navigation computations"
+             DESCRIPTION "refx - Compile-time safe C++ library for accurate coordinate transformations and navigation in mobile robotics."
              LANGUAGES CXX)
 
 # Compiler extensions
@@ -18,8 +18,8 @@ if (MSVC OR WIN32)
     add_compile_definitions(_USE_MATH_DEFINES)
 endif()
 
-# Enable/Disable Eigen Detection
-set(REFX_ENABLE_EIGEN_DETECTION ON CACHE BOOL "Enable the dection of Eigen3 Library")
+# Enable/disable Eigen detection
+set(REFX_ENABLE_EIGEN_DETECTION ON CACHE BOOL "Enable the dection of Eigen3 library")
  
 add_subdirectory(src)
 
