@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...4.0)
 
-project(refx VERSION 0.1.0
+project(refx VERSION 0.2.4
              DESCRIPTION "refx - Compile-time safe C++ library for accurate coordinate transformations and navigation in mobile robotics."
              LANGUAGES CXX)
 

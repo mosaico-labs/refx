@@ -37,7 +37,7 @@ include(FetchContent)
 FetchContent_Declare(
   refx
   GIT_REPOSITORY https://github.com/mosaico-labs/refx.git/
-  GIT_TAG        v0.1.0
+  GIT_TAG        v0.2.4
 )
 FetchContent_MakeAvailable(refx)
 ```
