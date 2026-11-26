@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: ${{ matrix.image }} / ${{ matrix.cxx }}
+    runs-on: ubuntu-latest
+    # Run inside official Ubuntu images so that every LTS (including ones no longer
+    # offered as GitHub-hosted runners) is tested with its stock toolchain.
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "ubuntu:20.04", cc: gcc,   cxx: g++,     packages: "" }
+          - { image: "ubuntu:22.04", cc: gcc,   cxx: g++,     packages: "" }
+          - { image: "ubuntu:22.04", cc: clang, cxx: clang++, packages: "clang" }
+          - { image: "ubuntu:24.04", cc: gcc,   cxx: g++,     packages: "" }
+          - { image: "ubuntu:24.04", cc: clang, cxx: clang++, packages: "clang" }
+    env:
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq build-essential cmake git ca-certificates ${{ matrix.packages }}
+          $CXX --version
+          cmake --version
+
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build -j"$(nproc)"
+
+      - name: Test
+        working-directory: build
+        run: ctest --output-on-failure
+
+      - name: Check that compile-time errors still fire
+        shell: bash
+        run: |
+          # Summing two Coordinate3D must be rejected by a static_assert.
+          cat > /tmp/compile_fail.cpp <<'EOF'
+          #include <refx/refx.h>
+          int main() {
+              refx::Coordinate3D<refx::ned> a{1, 2, 3}, b{1, 2, 3};
+              auto c = a + b;
+              (void)c;
+          }
+          EOF
+          if $CXX -std=c++17 -Isrc/include -fsyntax-only /tmp/compile_fail.cpp 2> /tmp/err.txt; then
+            echo "::error::Coordinate3D + Coordinate3D compiled, but it must be rejected"
+            exit 1
+          fi
+          grep -q "The summation between two Coordinate3D is not allowed" /tmp/err.txt || {
+            cat /tmp/err.txt
+            echo "::error::Compilation failed for an unexpected reason"
+            exit 1
+          }
+
+  macos:
+    name: macOS / Apple Clang
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build -j"$(sysctl -n hw.ncpu)"
+
+      - name: Test
+        working-directory: build
+        run: ctest --output-on-failure

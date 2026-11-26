@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string_view>
 
+#include "../../internal/always_false.h"
 #include "../internal/operators.h"
 #include "../rotations.h"
 
@@ -67,7 +68,7 @@ UnitQuaternion<T> euler_to_quat(const EulerAngles<Seq, T>& eul) {
     } else if constexpr (Seq == EulerSequence::XZY) {
         return q_x * q_z * q_y;
     } else {
-        static_assert(false, "Unsupported Euler sequence");
+        static_assert(internal::always_false_value_v<Seq>, "Unsupported Euler sequence");
     }
 }
 
@@ -204,7 +205,7 @@ EulerAngles<Seq, T> quat_to_euler(const UnitQuaternion<T>& quat) {
 
         return EulerAngles<Seq, T>(angle_y, angle_z, angle_x);
     } else {
-        static_assert(false, "Unsupported Euler sequence");
+        static_assert(internal::always_false_value_v<Seq>, "Unsupported Euler sequence");
     }
 }
 
