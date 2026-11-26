@@ -82,7 +82,7 @@ struct FrameTagValidator<tagA, tagB, tagC, ValidateCondition::XOR> {
      */
     static void validate() {
         static_assert(
-            tagA == tagC ^ tagB == tagC,
+            (tagA == tagC) != (tagB == tagC),
             "This operation is only allowed when only one between tagA and tagB is equal to tagC");
     }
 };

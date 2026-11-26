@@ -3,6 +3,8 @@
 
 #include <type_traits>  // For std::true_type, std::false_type
 
+#include "../internal/always_false.h"
+
 /**
  * @file axis.h
  * @brief Defines the architectural building blocks for coordinate frame axes.
@@ -131,7 +133,7 @@ constexpr AxisDirection opposite() {
         return AxisDirection::Left;
     } else {
         // Should be unreachable for valid inputs
-        static_assert(false, "Invalid AxisDirection input parameter.");
+        static_assert(internal::always_false_value_v<D>, "Invalid AxisDirection input parameter.");
     }
 }
 

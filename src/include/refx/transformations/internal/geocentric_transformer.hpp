@@ -5,6 +5,7 @@
 
 #include "../../frames/internal/validators.h"
 #include "../../geometry/coordinate.h"
+#include "../../internal/always_false.h"
 #include "../../math/angles.h"
 #include "../../models/earth_model/earth_model.h"
 
@@ -30,7 +31,8 @@ struct GeocentricTransformer {
             return from;
         } else {
             static_assert(
-                false, "GeocentricTransformer::transform not implemented for the types specified");
+                always_false_v<T>,
+                "GeocentricTransformer::transform not implemented for the types specified");
         }
     }
 };

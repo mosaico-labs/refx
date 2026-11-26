@@ -3,6 +3,7 @@
 
 #include "../../frames/axis.h"
 #include "../../frames/internal/traits.h"
+#include "../../internal/always_false.h"
 
 namespace refx {
 namespace internal {
@@ -39,7 +40,7 @@ constexpr T get_value_along(const VecType<Frame, T>& v) {
     } else if constexpr (AxisTraits<AxisFrom>::Z == opposite<TargetDir>()) {
         return -v.z();
     } else {
-        static_assert(false,
+        static_assert(always_false_v<Frame, T>,
                       "Unable to find target direction in input vector/coordinate. Maybe the used "
                       "frame contains incorrect axis direction (non right-handed).");
     }

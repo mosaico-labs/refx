@@ -3,6 +3,7 @@
 
 #include "../frames/internal/traits.h"  // For is_semantic_axis_v, is_directional_axis_v
 #include "../geometry/transformation.h"
+#include "../internal/always_false.h"
 #include "../models/earth_model/earth_model.h"
 #include "internal/frame_transformer.hpp"
 #include "internal/geocentric_transformer.hpp"
@@ -123,7 +124,7 @@ Coordinate3D<frameTo, T> frame_transform(const Coordinate3D<frameFrom, T>& from,
             em);
     } else {
         static_assert(
-            false,
+            internal::always_false_v<frameTo, frameFrom, frameOrigin, T>,
             "Incompatible frameFrom tag, must be FrameTag::Geocentric OR FrameTag::LocalTangent");
     }
 }

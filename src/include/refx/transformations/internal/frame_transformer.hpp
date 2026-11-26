@@ -5,6 +5,7 @@
 
 #include "../../frames/internal/validators.h"
 #include "../../geometry/coordinate.h"
+#include "../../internal/always_false.h"
 #include "../../math/angles.h"
 #include "../../models/earth_model/earth_model.h"
 #include "canonical_frames.h"
@@ -28,7 +29,7 @@ struct FrameTransformer {
     template <template <class, class> class VecType, typename T>
     static VecType<frameTo, T> transform(const VecType<frameFrom, T>& from) {
         static_assert(
-            false,
+            always_false_v<T>,
             "FrameTransformer::transform not implemented for the types specified. "
             "Parameters must have `axis_aer` and any cartesian (non geocentric) semantics.");
     }

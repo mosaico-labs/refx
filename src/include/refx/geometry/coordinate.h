@@ -4,6 +4,7 @@
 #include "../frames/frames.h"
 #include "../frames/internal/validators.h"
 #include "../geometry/vector.h"
+#include "../internal/always_false.h"
 #include "../math/angles.h"
 
 /**
@@ -318,7 +319,7 @@ struct Coordinate3D<aer, T> : public internal::VectorContainer3D<T> {
 template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a,
                                   const Coordinate3D<Frame2, T>& b) {
-    static_assert(false,
+    static_assert(internal::always_false_v<Frame1, Frame2, T>,
                   "The summation between two Coordinate3D is not allowed. Maybe you wanted to sum "
                   "two Vector3D. Check the documentation for details.");
 }

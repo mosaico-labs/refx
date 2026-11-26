@@ -5,6 +5,7 @@
 
 #include "../../frames/internal/validators.h"
 #include "../../geometry/coordinate.h"
+#include "../../internal/always_false.h"
 #include "../../math/angles.h"
 #include "../../models/earth_model/earth_model.h"
 #include "canonical_frames.h"
@@ -31,7 +32,7 @@ struct LocalTangentTransformer {
     static Coordinate3D<frameTo, T> transform(const Coordinate3D<frameFrom, T>& from,
                                               const Coordinate3D<frameOrigin, T>& origin,
                                               const EarthModel<T>& em) {
-        static_assert(false,
+        static_assert(always_false_v<T>,
                       "LocalTangentTransformer::transform not implemented for the types specified");
     }
 };
