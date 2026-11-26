@@ -55,7 +55,7 @@ You can install refx using Conan (v2.2 or newer) via the [RoboConan](https://git
   git clone https://github.com/RoboConan/RoboConan.git
   conan remote add roboconan "$PWD/RoboConan"
   ```
-- Include `refx/[>=0.2.1 <1]` as a requirement under your `conanfile.txt` or `conanfile.py`.
+- Include `refx/[>=0.2.4 <1]` as a requirement under your `conanfile.txt` or `conanfile.py`.
 - Eigen interoperability is enabled by default; set the `refx/*:with_eigen=False` option to build without the Eigen dependency.
 - Follow the regular [instructions](https://docs.conan.io/2/tutorial.html) for integrating Conan packages into your project
 
