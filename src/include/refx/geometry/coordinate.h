@@ -121,7 +121,6 @@ struct Coordinate3D<lla, T> : public internal::VectorContainer3D<T> {
      * @return The longitude value, converted to the specified unit. Defaults to degrees.
      */
     T longitude(AngleUnit unit = AngleUnit::Deg) const {
-        // BUG FIX: Was incorrectly returning this->x() (data[0]). Corrected to this->y() (data[1]).
         return (unit == AngleUnit::Rad) ? deg2rad(this->y()) : this->y();
     }
 
@@ -301,7 +300,6 @@ struct Coordinate3D<aer, T> : public internal::VectorContainer3D<T> {
      * @return A const reference to the internal `std::array` storing components as
      * {Azimuth (deg), Elevation (deg), Range (m)}.
      */
-    // BUG FIX: Comment was incorrect. Corrected to reflect AER components.
     const container_type& data() const { return internal::VectorContainer3D<T>::data; }
 };
 
@@ -332,10 +330,10 @@ Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a,
  *
  * - For **linear frames** (e.g., `NED`, `ECEF`), this performs a standard
  * component-wise subtraction, yielding a true Euclidean `Vector3D`.
- * - For **non-linear frames** (e.g., `LLA`), this performs a specialized
- * subtraction that correctly handles angular wrap-around (for longitude) and
- * clamping, yielding a `Vector3D<lla>` which represents a geodetic difference
- * vector `{Δlat, Δlon, Δalt}`.
+ * - For **non-linear frames** (e.g., `LLA`), this yields a `Vector3D<lla>` which represents
+ * the coordinate increment `{Δlat, Δlon, Δalt}`. Periodic components (longitude, azimuth)
+ * use the shortest-angle difference (e.g. across the antimeridian); bounded components
+ * (latitude, elevation) use the plain difference.
  *
  * @param a The destination coordinate (`to`).
  * @param b The origin coordinate (`from`).
@@ -343,10 +341,10 @@ Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a,
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> operator-(const Coordinate3D<Frame1, T>& a, const Coordinate3D<Frame2, T>& b) {
-    // The subtraction of two Vector3D objects will correctly invoke the
-    // specialized arithmetic defined by FramedVecOperator, which uses FrameTraits.
     internal::FrameValidator<Frame1, Frame2>::validate();
-    return Vector3D<Frame1, T>(a.data()) - Vector3D<Frame2, T>(b.data());
+    const auto d = internal::CoordinateOperator<Frame1, T>::difference(
+        {a.x(), a.y(), a.z()}, {b.x(), b.y(), b.z()});
+    return Vector3D<Frame1, T>(d[0], d[1], d[2]);
 }
 
 /**
@@ -356,9 +354,11 @@ Vector3D<Frame1, T> operator-(const Coordinate3D<Frame1, T>& a, const Coordinate
  * leverages the `FrameTraits` for the given `Frame`.
  *
  * - For **linear frames**, this is a standard component-wise addition.
- * - For **non-linear frames**, this correctly applies the differential quantities
- * from the vector to the coordinate, handling angular wrap-around and clamping
- * as needed.
+ * - For **non-linear frames**, this applies the increment to the coordinate and normalizes
+ * the result: periodic components (longitude, azimuth) are wrapped into their range, and a
+ * bounded component crossing its limit (e.g. latitude beyond a pole) is reflected back, with
+ * the coupled periodic component shifted by 180°. For example
+ * `(lat 80°, lon 10°) + (Δlat 20°, Δlon 0°) = (lat 80°, lon -170°)`.
  *
  * @param a The starting coordinate (point).
  * @param b The displacement vector to apply.
@@ -366,10 +366,10 @@ Vector3D<Frame1, T> operator-(const Coordinate3D<Frame1, T>& a, const Coordinate
  */
 template <typename Frame1, typename Frame2, typename T>
 Coordinate3D<Frame1, T> operator+(const Coordinate3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
-    // The addition will correctly invoke the specialized arithmetic from FramedVecOperator.
     internal::FrameValidator<Frame1, Frame2>::validate();
-    const auto& res = Vector3D<Frame1, T>(a.data()) + b;
-    return {res.x(), res.y(), res.z()};
+    const auto res = internal::CoordinateOperator<Frame1, T>::translate(
+        {a.x(), a.y(), a.z()}, {b.x(), b.y(), b.z()});
+    return Coordinate3D<Frame1, T>(res[0], res[1], res[2]);
 }
 
 /**

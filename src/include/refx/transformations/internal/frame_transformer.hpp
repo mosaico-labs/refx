@@ -94,7 +94,7 @@ struct FrameTransformer<axis_aer, axis_frd, frameTo, frameFrom> {
         const T r = std::hypot(rgt, fwd);
         const T rg = std::hypot(r, up);
         const T el = std::atan2(up, r);
-        const T two_pi = 2.0 * M_PI;
+        const T two_pi = T(2) * pi_v<T>;
         const T az = std::fmod(two_pi + std::fmod(std::atan2(rgt, fwd), two_pi), two_pi);
         return VecType<frameTo, T>{rad2deg(az), rad2deg(el), rg};
     }

@@ -2,6 +2,8 @@
 #define _REFX_GEOMETRY_INTERNAL_ROTATIONS_
 
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <string_view>
 
 #include "../../internal/always_false.h"
@@ -85,7 +87,7 @@ EulerAngles<Seq, T> quat_to_euler(const UnitQuaternion<T>& quat) {
 
         // Pitch (y-axis rotation)
         T sinp = 2 * (qw * qy - qz * qx);
-        T pitch = (std::abs(sinp) >= 1) ? std::copysign(M_PI_2, sinp) : std::asin(sinp);
+        T pitch = (std::abs(sinp) >= 1) ? std::copysign(internal::pi_v<T> / T(2), sinp) : std::asin(sinp);
 
         // Yaw (z-axis rotation)
         T siny_cosp = 2 * (qw * qz + qx * qy);
@@ -99,7 +101,7 @@ EulerAngles<Seq, T> quat_to_euler(const UnitQuaternion<T>& quat) {
         // Check for gimbal lock
         if ((1.0 - std::abs(sin_r)) < std::numeric_limits<T>::epsilon()) {
             // Use 90 degrees if locked
-            angle_x = std::copysign(M_PI_2, sin_r);
+            angle_x = std::copysign(internal::pi_v<T> / T(2), sin_r);
             // Yaw and pitch are ambiguous. Conventionally, set pitch to 0.
             angle_y = 0.0;
             // Calculate yaw from the remaining rotation
@@ -121,7 +123,7 @@ EulerAngles<Seq, T> quat_to_euler(const UnitQuaternion<T>& quat) {
         // Check for gimbal lock
         if ((1.0 - std::abs(sin_p)) < std::numeric_limits<T>::epsilon()) {
             // Use 90 degrees if locked
-            angle_y = std::copysign(M_PI_2, sin_p);
+            angle_y = std::copysign(internal::pi_v<T> / T(2), sin_p);
             // Roll and yaw are ambiguous. Conventionally, set yaw to 0.
             angle_z = 0.0;
             // Calculate roll from the remaining rotation
@@ -142,7 +144,7 @@ EulerAngles<Seq, T> quat_to_euler(const UnitQuaternion<T>& quat) {
         // Check for gimbal lock
         if ((1.0 - std::abs(sin_y)) < std::numeric_limits<T>::epsilon()) {
             // Use 90 degrees if locked
-            angle_z = std::copysign(M_PI_2, sin_y);
+            angle_z = std::copysign(internal::pi_v<T> / T(2), sin_y);
             // Roll and pitch are ambiguous. Conventionally, set pitch to 0.
             angle_y = 0.0;
             // Calculate roll from the remaining rotation
@@ -165,7 +167,7 @@ EulerAngles<Seq, T> quat_to_euler(const UnitQuaternion<T>& quat) {
         // Check for gimbal lock
         if ((1.0 - std::abs(sin_r)) < std::numeric_limits<T>::epsilon()) {
             // Use 90 degrees if locked
-            angle_x = std::copysign(M_PI_2, sin_r);
+            angle_x = std::copysign(internal::pi_v<T> / T(2), sin_r);
             // Pitch and yaw are ambiguous. Conventionally, set yaw to 0.
             angle_z = 0.0;
             // Calculate pitch from the remaining rotation
@@ -188,7 +190,7 @@ EulerAngles<Seq, T> quat_to_euler(const UnitQuaternion<T>& quat) {
         // Check for gimbal lock
         if ((1.0 - std::abs(sin_y)) < std::numeric_limits<T>::epsilon()) {
             // Use 90 degrees if locked
-            angle_z = std::copysign(M_PI_2, sin_y);
+            angle_z = std::copysign(internal::pi_v<T> / T(2), sin_y);
             // Pitch and roll are ambiguous. Conventionally, set roll to 0.
             angle_x = 0.0;
             // Calculate pitch from the remaining rotation

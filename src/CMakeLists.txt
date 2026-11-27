@@ -16,7 +16,9 @@ if(${REFX_ENABLE_EIGEN_DETECTION})
     find_package(Eigen3 3.4 QUIET)
 
     if(Eigen3_FOUND)
-        add_compile_definitions(REFX_ENABLE_EIGEN_SUPPORT)
+        # INTERFACE: the macro must reach every consumer of refx (and the tests), not only
+        # the targets defined in this directory.
+        target_compile_definitions(refx INTERFACE REFX_ENABLE_EIGEN_SUPPORT)
         target_link_libraries(refx INTERFACE Eigen3::Eigen)
 
         message(STATUS "Found Eigen3 version ${EIGEN3_VERSION_STRING}, enabling Eigen support.")

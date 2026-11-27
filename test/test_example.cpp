@@ -17,6 +17,11 @@
 // ---------------------- Frame Transformations Testing ----------------------
 //
 #include "include/transformations/test_transformations.hpp"
+
+//
+// ---------------------- Regression Testing ----------------------
+//
+#include "include/regression/test_regressions.hpp"
 /**
  * @brief Main function to run all Google Test suites.
  */

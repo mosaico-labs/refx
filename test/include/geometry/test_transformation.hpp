@@ -163,33 +163,35 @@ TEST_F(TransformationTest, TramsformationCoordinateProduct) {
 }
 
 /**
- * @test TramsformationCoordinateProduct
- * @brief Verifies the correctness of the operator* method, when rhs is a Vector<>
+ * @test TramsformationVectorProduct
+ * @brief A free vector is only rotated by a change of frame: the translation of the pose
+ * must not be applied.
  */
 TEST_F(TransformationTest, TramsformationVectorProduct) {
     // 1. Arrange: Create an initial transformation from vehicle (frd) to world (ned).
     auto T_ned_frd = TransformNED_FRD{test_rotation, test_translation};
 
-    // 2. Generate a Coordinate3D of the coherent frame type (frd).
+    // 2. A free vector (e.g. a velocity) in the frd frame.
     Vector3D<frd> v_frd(1, 2, 3);
 
-    // 3. Test multiplication legit and results
-    Vector3D<ned> v_ned = T_ned_frd * v_frd;
-    // The same result is obtained via:
-    // Vector3D<ned> v_ned = frame_transform(T_ned_frd, v_frd);
+    // 3. Applying the pose directly to a vector is a compile-time error:
+    // Vector3D<ned> v_ned = T_ned_frd * v_frd;  // ERROR: use T_ned_frd.rotation * v_frd
+    // Vector3D<ned> v_ned = frame_transform(T_ned_frd, v_frd);  // ERROR (same reason)
+    // A vector must be explicitly rotated:
+    Vector3D<ned> v_ned = T_ned_frd.rotation * v_frd;
 
-    // These are compile-time errors
-    // Vector3D<frd> v_ned = T_ned_frd * v_frd;
-    // Vector3D<ned> v_ned = T_ned_frd.inverse() * v_frd;
+    // 90-degree yaw: (f, r, d) -> (n, e, d) = (-r, f, d), no translation.
+    EXPECT_NEAR(v_ned.north(), -2.0, HARD_TOLERANCE);
+    EXPECT_NEAR(v_ned.east(), 1.0, HARD_TOLERANCE);
+    EXPECT_NEAR(v_ned.down(), 3.0, HARD_TOLERANCE);
 
-    // Assert that the computed inverse translation is nearly equal to the expected one.
-    EXPECT_NEAR(v_ned.north(), 8.0, HARD_TOLERANCE);
-    EXPECT_NEAR(v_ned.east(), 21.0, HARD_TOLERANCE);
-    EXPECT_NEAR(v_ned.down(), 33.0, HARD_TOLERANCE);
-
-    // This is possible: exploits object slicing (Coordinate3D is derived from Vector3D)
-    // TODO: decide about this to be lecit or not.
-    // v_ned = T_ned_frd * Coordinate3D<frd>();
+    // A displacement between two transformed points equals the rotated displacement.
+    Coordinate3D<frd> p1(1, 2, 3), p2(4, -1, 7);
+    Vector3D<ned> d_ned = (T_ned_frd * p2) - (T_ned_frd * p1);
+    Vector3D<ned> d_rot = T_ned_frd.rotation * (p2 - p1);
+    EXPECT_NEAR(d_ned.north(), d_rot.north(), HARD_TOLERANCE);
+    EXPECT_NEAR(d_ned.east(), d_rot.east(), HARD_TOLERANCE);
+    EXPECT_NEAR(d_ned.down(), d_rot.down(), HARD_TOLERANCE);
 }
 
 }  // namespace testing

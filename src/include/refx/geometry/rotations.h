@@ -236,8 +236,8 @@ struct EulerAngles<EulerSequence::ZYX, T> : public internal::EulerBase<T> {
     T pitch() const { return this->angle_y(); }
     T yaw() const { return this->angle_z(); }
 
-    EulerAngles<EulerSequence::XYZ, T> inverse() {
-        return EulerAngles<EulerSequence::XYZ>(-this->angle_x(), -this->angle_y(),
+    EulerAngles<EulerSequence::XYZ, T> inverse() const {
+        return EulerAngles<EulerSequence::XYZ, T>(-this->angle_x(), -this->angle_y(),
                                                -this->angle_z());
     }
 };
@@ -265,8 +265,8 @@ struct EulerAngles<EulerSequence::ZXY, T> : public internal::EulerBase<T> {
     };
     EulerAngles() : internal::EulerBase<T>(0, 0, 0) {}
     EulerAngles(T ang_z, T ang_x, T ang_y) : internal::EulerBase<T>(ang_x, ang_y, ang_z) {}
-    EulerAngles<EulerSequence::YXZ, T> inverse() {
-        return EulerAngles<EulerSequence::YXZ>(-this->angle_y(), -this->angle_x(),
+    EulerAngles<EulerSequence::YXZ, T> inverse() const {
+        return EulerAngles<EulerSequence::YXZ, T>(-this->angle_y(), -this->angle_x(),
                                                -this->angle_z());
     }
 };
@@ -289,8 +289,8 @@ struct EulerAngles<EulerSequence::YZX, T> : public internal::EulerBase<T> {
     };
     EulerAngles() : internal::EulerBase<T>(0, 0, 0) {}
     EulerAngles(T ang_y, T ang_z, T ang_x) : internal::EulerBase<T>(ang_x, ang_y, ang_z) {}
-    EulerAngles<EulerSequence::XZY, T> inverse() {
-        return EulerAngles<EulerSequence::XZY>(-this->angle_x(), -this->angle_z(),
+    EulerAngles<EulerSequence::XZY, T> inverse() const {
+        return EulerAngles<EulerSequence::XZY, T>(-this->angle_x(), -this->angle_z(),
                                                -this->angle_y());
     }
 };
@@ -314,8 +314,8 @@ struct EulerAngles<EulerSequence::YXZ, T> : public internal::EulerBase<T> {
 
     EulerAngles() : internal::EulerBase<T>(0, 0, 0) {}
     EulerAngles(T ang_y, T ang_x, T ang_z) : internal::EulerBase<T>(ang_x, ang_y, ang_z) {}
-    EulerAngles<EulerSequence::ZXY, T> inverse() {
-        return EulerAngles<EulerSequence::ZXY>(-this->angle_z(), -this->angle_x(),
+    EulerAngles<EulerSequence::ZXY, T> inverse() const {
+        return EulerAngles<EulerSequence::ZXY, T>(-this->angle_z(), -this->angle_x(),
                                                -this->angle_y());
     }
 };
@@ -339,8 +339,8 @@ struct EulerAngles<EulerSequence::XZY, T> : public internal::EulerBase<T> {
 
     EulerAngles() : internal::EulerBase<T>(0, 0, 0) {}
     EulerAngles(T ang_x, T ang_z, T ang_y) : internal::EulerBase<T>(ang_x, ang_y, ang_z) {}
-    EulerAngles<EulerSequence::YZX, T> inverse() {
-        return EulerAngles<EulerSequence::YZX>(-this->angle_y(), -this->angle_z(),
+    EulerAngles<EulerSequence::YZX, T> inverse() const {
+        return EulerAngles<EulerSequence::YZX, T>(-this->angle_y(), -this->angle_z(),
                                                -this->angle_x());
     }
 };
@@ -364,8 +364,8 @@ struct EulerAngles<EulerSequence::XYZ, T> : public internal::EulerBase<T> {
 
     EulerAngles() : internal::EulerBase<T>(0, 0, 0) {}
     EulerAngles(T ang_x, T ang_y, T ang_z) : internal::EulerBase<T>(ang_x, ang_y, ang_z) {}
-    EulerAngles<EulerSequence::ZYX, T> inverse() {
-        return EulerAngles<EulerSequence::ZYX>(-this->angle_z(), -this->angle_y(),
+    EulerAngles<EulerSequence::ZYX, T> inverse() const {
+        return EulerAngles<EulerSequence::ZYX, T>(-this->angle_z(), -this->angle_y(),
                                                -this->angle_x());
     }
 };
@@ -454,7 +454,7 @@ struct Rotation {
      */
     explicit Rotation(const Eigen::Matrix<T, 3, 3>& rot_matrix)
         : m_quat(UnitQuaternion<T>(rot_matrix)) {}
-#endif /* _REFX_GEOMETRY_ROTATIONS_ */
+#endif /* REFX_ENABLE_EIGEN_SUPPORT */
 
     // --- Factory Functions ---
     /**

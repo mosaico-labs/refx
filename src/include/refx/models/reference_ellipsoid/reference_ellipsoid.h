@@ -104,8 +104,8 @@ template <typename T = double>
 struct ReferenceEllipsoidWGS84 : public ReferenceEllipsoid<T> {
     /// @brief Constructs a WGS-84 ellipsoid with its standard defining constants.
     ReferenceEllipsoidWGS84()
-        : ReferenceEllipsoid<T>("WGS-84", 6378137.0, 6356752.314245, 298.257223563, 0.0818191908426,
-                                7.292115e-5, "2024.00") {}
+        : ReferenceEllipsoid<T>("WGS-84", 6378137.0, 6356752.314245, 298.257223563,
+                                0.0818191908426215, 7.292115e-5, "2024.00") {}
 };
 
 /**
@@ -120,7 +120,7 @@ struct ReferenceEllipsoidGRS80 : public ReferenceEllipsoid<T> {
     /// @brief Constructs a GRS-80 ellipsoid with its standard defining constants.
     ReferenceEllipsoidGRS80()
         : ReferenceEllipsoid<T>("GRS-80", 6378137.0, 6356752.314140, 298.257222101,
-                                0.0818191908426215, 7.292115e-5, "1989.00") {}
+                                0.0818191910428158, 7.292115e-5, "1989.00") {}
 };
 
 }  // namespace refx

@@ -231,11 +231,14 @@ struct Vector3D<nwu, T> : public internal::VectorContainer3D<T> {
  *
  * Its primary purpose is to hold the result of subtracting two `Coordinate3D<lla>`
  * positions. The subtraction operation that creates this vector is specialized:
- * - The latitude difference (`Δlat`) is calculated as the **shortest angle**,
- * correctly handling the wrap-around at ±90°.
+ * - The latitude difference (`Δlat`) is the plain difference (always within ±180°).
  * - The longitude difference (`Δlon`) is calculated as the **shortest angle**,
- * correctly handling the wrap-around at ±180°.
- * - The altitude difference is simple linear subtractions.
+ * correctly handling the wrap-around at ±180° (antimeridian).
+ * - The altitude difference is simple linear subtraction.
+ *
+ * Arithmetic between increments (sum, scaling, ...) is plain linear arithmetic: no angular
+ * normalization is applied to a `Vector3D<lla>`. Normalization happens only when the increment
+ * is applied to a coordinate (`Coordinate3D<lla> + Vector3D<lla>`).
  *
  * The components have mixed units of **degrees** and **meters**. Consequently,
  * standard vector operations like magnitude, dot/cross products, or arbitrary scaling
@@ -331,11 +334,12 @@ struct Vector3D<lla, T> : public internal::VectorContainer3D<T> {
  *
  * Its primary purpose is to hold the result of subtracting two `Coordinate3D<lld>`
  * positions. The subtraction operation that creates this vector is specialized:
- * - The latitude difference (`Δlat`) is calculated as the **shortest angle**,
- * correctly handling the wrap-around at ±90°.
+ * - The latitude difference (`Δlat`) is the plain difference (always within ±180°).
  * - The longitude difference (`Δlon`) is calculated as the **shortest angle**,
- * correctly handling the wrap-around at ±180°.
+ * correctly handling the wrap-around at ±180° (antimeridian).
  * - The down difference is simple linear subtraction.
+ *
+ * Arithmetic between increments is plain linear arithmetic (no angular normalization).
  *
  * The components have mixed units of **degrees** and **meters**. Consequently,
  * standard vector operations like magnitude, dot/cross products, or arbitrary scaling
@@ -428,15 +432,16 @@ struct Vector3D<lld, T> : public internal::VectorContainer3D<T> {
  *
  * @details This class is a highly specialized type and does **not** represent a standard
  * Euclidean vector. Instead, it represents a **differential quantity** or a "geodetic
- * difference vector" whose components are `{Δazimuth, Δlongitude, Δdown}`.
+ * difference vector" whose components are `{Δazimuth, Δelevation, Δrange}`.
  *
  * Its primary purpose is to hold the result of subtracting two `Coordinate3D<aer>`
  * positions. The subtraction operation that creates this vector is specialized:
- * - The azimuth difference (`Δaz`) is calculated as the **shortest angle**,
- * correctly handling the wrap-around at 0...360°°.
- * - The elevation difference (`Δele`) is calculated as the **shortest angle**,
- * correctly handling the wrap-around at ±180°.
- * - The altitude difference is simple linear subtraction.
+ * - The azimuth difference (`Δaz`) is calculated as the **shortest angle**, in [-180°, 180°),
+ * correctly handling the wrap-around at 0/360°.
+ * - The elevation difference (`Δele`) is the plain difference.
+ * - The range difference is simple linear subtraction.
+ *
+ * Arithmetic between increments is plain linear arithmetic (no angular normalization).
  *
  * The components have mixed units of **degrees** and **meters**. Consequently,
  * standard vector operations like magnitude, dot/cross products, or arbitrary scaling
@@ -736,7 +741,7 @@ struct Vector3D<flu, T> : public internal::VectorContainer3D<T> {
  * at compile-time if they do not match.
  *
  * The actual calculation is delegated to the `internal::FramedVecOperator`, which performs a
- * component-wise addition that respects the `FrameTraits` of the frame.
+ * plain component-wise addition.
  *
  * @tparam Frame The shared reference frame of the vectors.
  * @tparam T The scalar type of the vectors.
@@ -771,9 +776,9 @@ Vector3D<Frame, T> operator-(const Vector3D<Frame, T>& v) {
  * @details This operator serves as the user-facing entry point for vector subtraction.
  * It enforces that both operands belong to the same reference frame.
  *
- * The calculation is delegated to the `internal::FramedVecOperator`, which will apply
- * specialized logic (e.g., shortest-angle difference for longitude) for non-linear
- * axes as defined in the frame's `FrameTraits`.
+ * The calculation is delegated to the `internal::FramedVecOperator`, which performs a
+ * plain component-wise subtraction. (The shortest-angle logic for periodic components
+ * applies to the difference between two *coordinates*, see `Coordinate3D`.)
  *
  * @tparam Frame The shared reference frame of the vectors.
  * @tparam T The scalar type of the vectors.
@@ -790,9 +795,7 @@ Vector3D<Frame1, T> operator-(const Vector3D<Frame1, T>& a, const Vector3D<Frame
 
 /**
  * @brief Performs trait-aware scalar multiplication (vector * scalar).
- * @details Scales a vector by a scalar value. The operation is handled by the
- * `internal::FramedVecOperator`, which may apply normalization to angular components
- * after scaling.
+ * @details Scales a vector by a scalar value (plain component-wise product).
  * @tparam Frame The reference frame of the vector.
  * @tparam T The scalar type.
  * @param a The vector to be scaled.
@@ -845,10 +848,9 @@ Vector3D<Frame, T> operator/(const Vector3D<Frame, T>& a, T b) {
  * @param a The left-hand side vector in the cross product (`a x b`).
  * @param b The right-hand side vector in the cross product (`a x b`).
  * @return `a x b`, a new `Vector3D<Frame, T>` representing the orthogonal vector.
- * @warning This operation is only physically meaningful for vectors in Cartesian
- * reference frames (e.g., `NED`, `FRD`, `ECEF`). Using it on non-Cartesian types
- * like `Vector3D<lla>` will compile but produce a mathematically nonsensical result.
- * A compile-time error will occur if `a` and `b` have different frame types.
+ * @note This operation is only defined for vectors in Cartesian reference frames
+ * (e.g., `NED`, `FRD`, `ECEF`): using it on non-Cartesian types like `Vector3D<lla>` is a
+ * compile-time error, as is using it with `a` and `b` of different frame types.
  */
 template <typename Frame1, typename Frame2, typename T>
 Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {
@@ -866,10 +868,9 @@ Vector3D<Frame1, T> cross(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T
  * @param a The left-hand side vector in the dot product (`a · b`).
  * @param b The right-hand side vector in the dot product (`a · b`).
  * @return a scalar representing the dot product `a . b`.
- * @warning This operation is only physically meaningful for vectors in Cartesian
- * reference frames (e.g., `NED`, `FRD`, `ECEF`). Using it on non-Cartesian types
- * like `Vector3D<lla>` will compile but produce a mathematically nonsensical result.
- * A compile-time error will occur if `a` and `b` have different frame types.
+ * @note This operation is only defined for vectors in Cartesian reference frames
+ * (e.g., `NED`, `FRD`, `ECEF`): using it on non-Cartesian types like `Vector3D<lla>` is a
+ * compile-time error, as is using it with `a` and `b` of different frame types.
  */
 template <typename Frame1, typename Frame2, typename T>
 T dot(const Vector3D<Frame1, T>& a, const Vector3D<Frame2, T>& b) {

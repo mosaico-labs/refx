@@ -126,10 +126,13 @@ struct GeocentricTransformer<lla, ecef> {
 
         // Prime vertical radius of curvature
         T sinLat = std::sin(lat);
+        T cosLat = std::cos(lat);
         T N = a / std::sqrt(1.0 - e2 * sinLat * sinLat);
 
-        // Altitude
-        T alt = p / std::cos(lat) - N;
+        // Altitude. The classic `p / cos(lat) - N` is singular at the poles (cos(lat) -> 0);
+        // this form is equivalent and well-conditioned at every latitude:
+        // h = p cos(lat) + z sin(lat) - a^2 / N
+        T alt = p * cosLat + z * sinLat - a * a / N;
 
         return Coordinate3D<lla, T>::from_radians(lat, lon, alt);
     }

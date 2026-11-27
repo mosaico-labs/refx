@@ -130,20 +130,22 @@ Coordinate3D<frameTo, T> frame_transform(const Coordinate3D<frameFrom, T>& from,
 }
 
 /**
- * @brief Transforms a vector/coordinate between two Cartesian frames using a full SE(3) pose.
- * @details This function serves as operator for transforming physical quantities
- * between two Cartesian frames (e.g., from a vehicle's body to the world).
- * It uses a `Transformation` object to provide the complete pose (the SE(3)
- * context) that defines the relationship between the source and destination frames.
+ * @brief Transforms a coordinate between two Cartesian frames using a full SE(3) pose.
+ * @details This function serves as operator for transforming positions between two
+ * Cartesian frames (e.g., from a vehicle's body to the world). It uses a `Transformation`
+ * object to provide the complete pose (the SE(3) context) that defines the relationship
+ * between the source and destination frames. It is equivalent to `pose * p_from`.
+ * @note Only `Coordinate3D` is accepted: passing a `Vector3D` is a compile-time error, since
+ * a vector is only rotated by a change of frame (use `pose.rotation * v`).
  * @tparam frameTo The destination (target) Cartesian frame tag type.
  * @tparam frameFrom The source Cartesian frame tag type.
- * @tparam VecType The underlying vector type (Vector3D/Coordinate3D).
+ * @tparam VecType The underlying type (must be `Coordinate3D`).
  * @tparam T The underlying scalar type for calculations (e.g., double, float).
- * @param from The `Vector3D/Coordinate3D` to be transformed.
  * @param pose The `Transformation<frameTo, frameFrom, T>` object that defines
  * the complete pose (orientation and position) of the `frameFrom`
  * relative to the `frameTo`.
- * @return A new `Vector3D/Coordinate3D<frameTo>` representing the `from` vector expressed
+ * @param p_from The `Coordinate3D` to be transformed.
+ * @return A new `Coordinate3D<frameTo>` representing the same point expressed
  * in the destination frame.
  */
 template <typename frameTo, typename frameFrom, template <class, class> class VecType, typename T>
