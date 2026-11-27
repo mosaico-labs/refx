@@ -1,6 +1,8 @@
 #ifndef _REFX_GEOMETRY_TRANSFORMATION_
 #define _REFX_GEOMETRY_TRANSFORMATION_
 
+#include "../internal/always_false.h"
+#include "coordinate.h"
 #include "internal/traits.h"
 #include "rotations.h"
 #include "vector.h"
@@ -84,25 +86,43 @@ struct Transformation {
 };
 
 /**
- * @brief Implements the product between a pose and a vector.
- * @details The compile-time frame safety ensures that suchg operation can only be
- * made only if the input vector matches the `FromFrame` of the Transformation
+ * @brief Applies a pose to a point (coordinate): `p_A = R_A_B * p_B + t_A_B`.
+ * @details A coordinate is a position, so it is both rotated and translated.
+ * The compile-time frame safety ensures that the operation can be made only if the input
+ * coordinate matches the `FromFrame` of the Transformation.
  *
- * @tparam A The final destination frame (e.g., world).
- * @tparam B The intermediate frame (e.g., vehicle).
- * @tparam C The original source frame (e.g., camera).
+ * @tparam FrameA The destination frame.
+ * @tparam FrameB The source frame of the transformation.
+ * @tparam FrameC The frame of the coordinate (must be equal to `FrameB`).
  * @tparam T The underlying scalar type.
  * @param T_A_B The transformation from frame B to frame A.
- * @param T_B_C The transformation from frame C to frame B.
- * @return A new Transformation object of type `Transformation<A, C, T>` representing
- * the direct transformation from frame C to frame A.
+ * @param p The coordinate expressed in frame B.
+ * @return The same point, expressed in frame A.
  */
-template <typename FrameA, typename FrameB, typename FrameC, template <class, class> class VecType,
-          typename T>
-VecType<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>& T_A_B,
-                             const VecType<FrameC, T>& V) {
+template <typename FrameA, typename FrameB, typename FrameC, typename T>
+Coordinate3D<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>& T_A_B,
+                                  const Coordinate3D<FrameC, T>& p) {
     internal::FrameValidator<FrameB, FrameC>::validate();
-    return VecType<FrameA, T>(T_A_B.rotation * V + T_A_B.translation);
+    return T_A_B.rotation * p + T_A_B.translation;
+}
+
+/**
+ * @brief Applying a pose to a free vector is disallowed (compile-time error).
+ * @details A vector (displacement, velocity, acceleration, force, ...) does not depend on
+ * the origin of the frame: under a change of frame it is only rotated, the translation of the
+ * pose does not apply (for a displacement `d = p2 - p1`: `T * p2 - T * p1 = R * d`).
+ * To avoid any ambiguity, the operation must be written explicitly:
+ * - `T_A_B.rotation * v` to re-express a vector in frame A;
+ * - `T_A_B * p` with `p` a `Coordinate3D`, to transform a position.
+ */
+template <typename FrameA, typename FrameB, typename FrameC, typename T>
+Vector3D<FrameA, T> operator*(const Transformation<FrameA, FrameB, T>&,
+                              const Vector3D<FrameC, T>&) {
+    static_assert(internal::always_false_v<FrameA, FrameB, FrameC, T>,
+                  "A Transformation cannot be applied to a Vector3D: a vector is only rotated by a "
+                  "change of frame. Use `T.rotation * v` for vectors, or apply the Transformation "
+                  "to a Coordinate3D to transform a position.");
+    return {};
 }
 
 /**

@@ -75,6 +75,27 @@ jobs:
             exit 1
           }
 
+          # Applying a Transformation to a Vector3D must be rejected by a static_assert
+          # (a vector is only rotated: `T.rotation * v`).
+          cat > /tmp/compile_fail_tv.cpp <<'EOF'
+          #include <refx/refx.h>
+          int main() {
+              refx::Transformation<refx::ned, refx::frd> T;
+              refx::Vector3D<refx::frd> v{1, 2, 3};
+              auto w = T * v;
+              (void)w;
+          }
+          EOF
+          if $CXX -std=c++17 -Isrc/include -fsyntax-only /tmp/compile_fail_tv.cpp 2> /tmp/err_tv.txt; then
+            echo "::error::Transformation * Vector3D compiled, but it must be rejected"
+            exit 1
+          fi
+          grep -q "A Transformation cannot be applied to a Vector3D" /tmp/err_tv.txt || {
+            cat /tmp/err_tv.txt
+            echo "::error::Compilation failed for an unexpected reason"
+            exit 1
+          }
+
   macos:
     name: macOS / Apple Clang
     runs-on: macos-latest

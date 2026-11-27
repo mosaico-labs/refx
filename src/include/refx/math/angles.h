@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <tuple>
+#include <type_traits>
 
 /**
  * @file angles.h
@@ -17,6 +18,18 @@
  */
 
 namespace refx {
+
+namespace internal {
+/// @brief The constant pi. Defined here so the library does not rely on the non-standard `M_PI`
+/// macro (which requires `_USE_MATH_DEFINES` on MSVC).
+template <typename T>
+inline constexpr T pi_v = static_cast<T>(3.141592653589793238462643383279502884L);
+
+/// @brief Floating-point type used for angle conversions: integral inputs are promoted to
+/// `double`, floating-point inputs keep their own type.
+template <typename T>
+using angle_float_t = std::conditional_t<std::is_integral_v<T>, double, T>;
+}  // namespace internal
 
 /**
  * @brief Specifies units for angular quantities, used in accessor methods.
@@ -33,12 +46,12 @@ enum class AngleUnit {
  * inputs to be in radians.
  * @tparam T The scalar type of the angle (e.g., `float`, `double`).
  * @param deg The angle in decimal degrees.
- * @return The equivalent angle in radians.
- * @note The mathematical constant `M_PI` is used for the conversion factor.
+ * @return The equivalent angle in radians. Integral inputs are promoted to `double`.
  */
 template <typename T>
-inline T deg2rad(T deg) {
-    return deg * M_PI / 180.0;
+inline internal::angle_float_t<T> deg2rad(T deg) {
+    using R = internal::angle_float_t<T>;
+    return static_cast<R>(deg) * (internal::pi_v<R> / R(180));
 }
 
 /**
@@ -48,11 +61,12 @@ inline T deg2rad(T deg) {
  * degree format, which is standard for geodetic coordinates (latitude/longitude).
  * @tparam T The scalar type of the angle (e.g., `float`, `double`).
  * @param rad The angle in radians.
- * @return The equivalent angle in decimal degrees.
+ * @return The equivalent angle in decimal degrees. Integral inputs are promoted to `double`.
  */
 template <typename T>
-inline T rad2deg(T rad) {
-    return rad * 180.0 / M_PI;
+inline internal::angle_float_t<T> rad2deg(T rad) {
+    using R = internal::angle_float_t<T>;
+    return static_cast<R>(rad) * (R(180) / internal::pi_v<R>);
 }
 
 /**
@@ -63,13 +77,26 @@ inline T rad2deg(T rad) {
  * @tparam T The scalar type of the input angle.
  * @param decimal_deg The angle in decimal degrees.
  * @return A `std::tuple<int, int, T>` containing the (degrees, minutes, seconds).
+ * @note The sign of a negative angle is carried by the first non-zero component, so that
+ * angles in (-1°, 0°) are representable: e.g. -0.5° -> (0, -30, 0).
  */
 template <typename T>
 inline std::tuple<int, int, T> degToDMS(T decimal_deg) {
-    const int deg = static_cast<int>(decimal_deg);
-    const T minutes_total = std::abs(decimal_deg - deg) * 60.0;
-    const int min = static_cast<int>(minutes_total);
-    const T sec = (minutes_total - min) * 60.0;
+    const bool negative = std::signbit(decimal_deg);
+    const T abs_deg = std::abs(decimal_deg);
+    int deg = static_cast<int>(abs_deg);
+    const T minutes_total = (abs_deg - deg) * T(60);
+    int min = static_cast<int>(minutes_total);
+    T sec = (minutes_total - min) * T(60);
+    if (negative) {
+        if (deg != 0) {
+            deg = -deg;
+        } else if (min != 0) {
+            min = -min;
+        } else {
+            sec = -sec;
+        }
+    }
     return {deg, min, sec};
 }
 
@@ -80,15 +107,19 @@ inline std::tuple<int, int, T> degToDMS(T decimal_deg) {
  * negative degree values.
  * @tparam T The scalar type used for the seconds component and for intermediate calculations.
  * @param deg The integer degrees component. Can be negative.
- * @param min The integer minutes component (should be positive).
- * @param sec The floating-point seconds component (should be positive).
+ * @param min The integer minutes component. Can be negative only when `deg == 0`.
+ * @param sec The floating-point seconds component. Can be negative only when `deg == 0` and
+ * `min == 0`.
  * @return The equivalent angle in decimal degrees.
- * @note The sign of the result is determined solely by the `deg` parameter.
+ * @note The result is negative if any of the components is negative (this is the inverse of
+ * `degToDMS`, which places the sign on the first non-zero component).
  */
 template <typename T>
 inline T DMSToDeg(int deg, int min, T sec) {
-    const T sign = (deg < 0 || std::signbit(static_cast<T>(deg))) ? -1.0 : 1.0;
-    return sign * (std::abs(static_cast<T>(deg)) + static_cast<T>(min) / 60.0 + sec / 3600.0);
+    const bool negative = deg < 0 || min < 0 || std::signbit(sec);
+    const T magnitude = static_cast<T>(std::abs(deg)) + static_cast<T>(std::abs(min)) / T(60) +
+                        std::abs(sec) / T(3600);
+    return negative ? -magnitude : magnitude;
 }
 
 }  // namespace refx

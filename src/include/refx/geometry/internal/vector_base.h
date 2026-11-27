@@ -1,10 +1,12 @@
 #ifndef _REFX_GEOMETRY_INTERNAL_VECTOR_BASE_
 #define _REFX_GEOMETRY_INTERNAL_VECTOR_BASE_
 
-#include <algorithm>  // for std::copy
+#include <algorithm>  // for std::copy, std::copy_n, std::min
 #include <array>
+#include <cassert>
 #include <cmath>    // for std::sqrt
 #include <cstddef>  // for size_t
+#include <initializer_list>
 #include <ostream>
 
 // Conditionally include Eigen headers if support is enabled by the user.
@@ -69,8 +71,9 @@ struct VectorContainerXD {
 
     /**
      * @brief Default constructor.
-     * @warning The vector's components are left uninitialized for performance,
-     * similar to fundamental types.
+     * @warning At this level the components are left uninitialized. Note that all the derived
+     * types (`VectorContainer3D`, `Vector3D`, `Coordinate3D`, ...) instead provide a default
+     * constructor that zero-initializes the components.
      */
     VectorContainerXD() = default;
 
@@ -83,12 +86,17 @@ struct VectorContainerXD {
 
     /**
      * @brief Initializer list constructor.
-     * @details Constructs the vector from a C++ initializer list.
-     * @param init The initializer list. Its size should match the vector's dimension.
+     * @details Constructs the vector from a C++ initializer list. Missing trailing components
+     * are zero-initialized (consistent with the component-wise constructors, whose arguments
+     * default to 0). Extra elements beyond the dimension `D` are a programming error: they
+     * trigger an assertion in debug builds and are ignored otherwise (never written out of
+     * bounds).
+     * @param init The initializer list, with at most `D` elements.
      */
     VectorContainerXD(std::initializer_list<T> init) {
-        // Note: Assumes init.size() == D. No runtime check for performance.
-        std::copy(init.begin(), init.end(), data.begin());
+        assert(init.size() <= D && "Too many elements in initializer list");
+        data.fill(T(0));
+        std::copy_n(init.begin(), std::min(init.size(), D), data.begin());
     }
 
     /**

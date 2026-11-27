@@ -13,7 +13,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU
     add_compile_options(-Wall)
 endif()
 
-# Enable math constants (M_PI, M_PI_2, etc.) on MSVC/Windows
+# Enable math constants (M_PI, M_PI_2, etc.) on MSVC/Windows.
+# Only needed by the tests and examples of this repository: the library headers do not use M_PI.
 if (MSVC OR WIN32)
     add_compile_definitions(_USE_MATH_DEFINES)
 endif()

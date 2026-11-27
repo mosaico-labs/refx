@@ -70,7 +70,8 @@ TEST_F(VectorCoordinateTest, LongitudeSubtractionWrapsCorrectly) {
     // The displacement should be 2 degrees eastward, not -358 degrees.
     Vector3D<lla, double> displacement = p2_lla - p1_lla;
 
-    EXPECT_NEAR(displacement.delta_latitude(), 2.0, HARD_TOLERANCE);
+    // Latitude does not wrap: from +89 to -89 the (only) difference is -178 degrees.
+    EXPECT_NEAR(displacement.delta_latitude(), -178.0, HARD_TOLERANCE);
     EXPECT_NEAR(displacement.delta_longitude(), 2.0,
                 HARD_TOLERANCE);  // 179 -> -179 is a 2 deg eastward change
     EXPECT_NEAR(displacement.delta_altitude(), 0.0, HARD_TOLERANCE);
